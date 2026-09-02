@@ -55,6 +55,14 @@
             z-index: 10;
         }
 
+        .btn-selected-gt {
+            background-color: #a855f7 !important; /* purple-500 */
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
         /* Custom scrollbar for horizontal tables */
         ::-webkit-scrollbar {
             height: 6px;
@@ -248,8 +256,22 @@
                 </div>
             </div>
             
-            <div id="missed-classes-list" class="w-full">
-                <!-- Missed classes injected via JS -->
+            <div class="flex flex-col gap-10">
+                <!-- Personally Missed List -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-user-times text-rose-500"></i> Personally Missed</h3>
+                    <div id="missed-classes-list-personal" class="w-full">
+                        <!-- Missed classes injected via JS -->
+                    </div>
+                </div>
+
+                <!-- GT Missed List -->
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-users-slash text-purple-500"></i> Mass Bunks (GT)</h3>
+                    <div id="missed-classes-list-gt" class="w-full">
+                        <!-- GT classes injected via JS -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -408,11 +430,9 @@
 
     <script>
         // --- SUPABASE CREDENTIALS & INITIALIZATION ---
-        // Replace these two constants with your actual Supabase keys from project settings
         const SUPABASE_URL = 'https://qnruaejrsfvebvlulnxe.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_J-AyWA1Lidy9J4-ElhTX0w_CnZkouPv';
 
-        // Initialize Supabase Client (Renamed to supabaseClient to avoid conflicts)
         let supabaseClient = null;
         if (typeof window.supabase !== 'undefined' && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -748,7 +768,7 @@
             let stats = {};
             Object.values(appData.schedule).forEach(day => {
                 day.slots.forEach(subject => {
-                    if (subject.trim() !== "") stats[subject.trim()] = { attended: 0, missed: 0, held: 0 };
+                    if (subject.trim() !== "") stats[subject.trim()] = { attended: 0, missed: 0, gt: 0, held: 0 };
                 });
             });
 
@@ -775,7 +795,7 @@
                         while (i + span < SLOTS && dailyTemplate[i + span].trim() === subject) span++;
 
                         if (!replacedSlots.has(i)) {
-                            if (!stats[subject]) stats[subject] = { attended: 0, missed: 0, held: 0 };
+                            if (!stats[subject]) stats[subject] = { attended: 0, missed: 0, gt: 0, held: 0 };
                             const status = dayRecord.slots[i];
                             if (status === 'attended') {
                                 stats[subject].attended++;
@@ -783,6 +803,8 @@
                             } else if (status === 'missed') {
                                 stats[subject].missed++;
                                 stats[subject].held++;
+                            } else if (status === 'gt') {
+                                stats[subject].gt++;
                             }
                         }
                         i += span;
@@ -793,13 +815,15 @@
 
                 if (dayRecord.extra) {
                     dayRecord.extra.forEach(ext => {
-                        if (!stats[ext.subject]) stats[ext.subject] = { attended: 0, missed: 0, held: 0 };
+                        if (!stats[ext.subject]) stats[ext.subject] = { attended: 0, missed: 0, gt: 0, held: 0 };
                         if (ext.status === 'attended') {
                             stats[ext.subject].attended++;
                             stats[ext.subject].held++;
                         } else if (ext.status === 'missed') {
                             stats[ext.subject].missed++;
                             stats[ext.subject].held++;
+                        } else if (ext.status === 'gt') {
+                            stats[ext.subject].gt++;
                         }
                     });
                 }
@@ -808,7 +832,7 @@
         }
 
         function getMissedClasses() {
-            let missedList = [];
+            let missedList = { personal: [], gt: [] };
             for (const [dateStr, dayRecord] of Object.entries(appData.records)) {
                 if (dayRecord.isHoliday) continue;
 
@@ -833,8 +857,9 @@
                         while (i + span < SLOTS && dailyTemplate[i + span].trim() === subject) span++;
 
                         if (!replacedSlots.has(i)) {
-                            if (dayRecord.slots[i] === 'missed') {
-                                missedList.push({
+                            if (dayRecord.slots[i] === 'missed' || dayRecord.slots[i] === 'gt') {
+                                const listToPush = dayRecord.slots[i] === 'gt' ? missedList.gt : missedList.personal;
+                                listToPush.push({
                                     dateObj: recordDate,
                                     dateString: dateStr,
                                     subject: subject,
@@ -851,8 +876,9 @@
 
                 if (dayRecord.extra) {
                     dayRecord.extra.forEach(ext => {
-                        if (ext.status === 'missed') {
-                            missedList.push({
+                        if (ext.status === 'missed' || ext.status === 'gt') {
+                            const listToPush = ext.status === 'gt' ? missedList.gt : missedList.personal;
+                            listToPush.push({
                                 dateObj: recordDate,
                                 dateString: dateStr,
                                 subject: ext.subject,
@@ -863,7 +889,8 @@
                     });
                 }
             }
-            missedList.sort((a, b) => b.dateObj - a.dateObj);
+            missedList.personal.sort((a, b) => b.dateObj - a.dateObj);
+            missedList.gt.sort((a, b) => b.dateObj - a.dateObj);
             return missedList;
         }
         
@@ -1013,18 +1040,19 @@
                             selectedStatus = dateRecord.slots[mergedIndices[0]];
                         }
 
-                        // Updated segmented control UI strings
-                        const baseBtn = "flex-1 md:w-28 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border border-transparent";
+                        // Updated segmented control UI strings including GT
+                        const baseBtn = "flex-1 md:w-auto py-2.5 px-3 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border border-transparent";
                         const btnAtt = selectedStatus === 'attended' ? `${baseBtn} btn-selected-attended` : `${baseBtn} text-slate-500 hover:bg-emerald-50 hover:text-emerald-600`;
                         const btnMis = selectedStatus === 'missed' ? `${baseBtn} btn-selected-missed` : `${baseBtn} text-slate-500 hover:bg-rose-50 hover:text-rose-600`;
+                        const btnGt  = selectedStatus === 'gt' ? `${baseBtn} btn-selected-gt` : `${baseBtn} text-slate-500 hover:bg-purple-50 hover:text-purple-600`;
                         const btnCan = selectedStatus === 'cancelled' ? `${baseBtn} btn-selected-cancelled` : `${baseBtn} text-slate-500 hover:bg-slate-200 hover:text-slate-700`;
 
-                        const accentColor = selectedStatus === 'attended' ? 'bg-emerald-500' : selectedStatus === 'missed' ? 'bg-rose-500' : selectedStatus === 'cancelled' ? 'bg-slate-500' : 'bg-blue-500';
+                        const accentColor = selectedStatus === 'attended' ? 'bg-emerald-500' : selectedStatus === 'missed' ? 'bg-rose-500' : selectedStatus === 'gt' ? 'bg-purple-500' : selectedStatus === 'cancelled' ? 'bg-slate-500' : 'bg-blue-500';
                         const badgeHTML = mergedIndices.length > 1 ? '<span class="text-[10px] font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md ml-2 align-middle border border-blue-200 tracking-wide uppercase">2 Hr Lab</span>' : '';
                         const arrayStr = `[${mergedIndices.join(',')}]`;
 
                         listDiv.innerHTML += `
-                            <div class="group flex flex-col md:flex-row md:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
+                            <div class="group flex flex-col xl:flex-row xl:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300 ${accentColor}"></div>
                                 
                                 <div class="flex flex-col flex-1 pl-2">
@@ -1037,15 +1065,18 @@
                                     </div>
                                 </div>
 
-                                <div class="flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full md:w-auto gap-1">
+                                <div class="grid grid-cols-2 lg:flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full xl:w-auto gap-1">
                                     <button onclick="markClass(${arrayStr}, 'attended')" class="${btnAtt}">
-                                        <i class="fas fa-check"></i> <span>Attended</span>
+                                        <i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span>
                                     </button>
                                     <button onclick="markClass(${arrayStr}, 'missed')" class="${btnMis}">
-                                        <i class="fas fa-times"></i> <span>Missed</span>
+                                        <i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span>
+                                    </button>
+                                    <button onclick="markClass(${arrayStr}, 'gt')" class="${btnGt}">
+                                        <i class="fas fa-users-slash"></i> <span>GT</span>
                                     </button>
                                     <button onclick="markClass(${arrayStr}, 'cancelled')" class="${btnCan}">
-                                        <i class="fas fa-minus"></i> <span>Cancelled</span>
+                                        <i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span>
                                     </button>
                                 </div>
                             </div>
@@ -1070,12 +1101,13 @@
 
         function renderExtraClassesOnly(extraClasses, listDiv) {
             extraClasses.forEach(ext => {
-                const baseBtn = "flex-1 md:w-28 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border border-transparent";
+                const baseBtn = "flex-1 md:w-auto py-2.5 px-3 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border border-transparent";
                 const btnAtt = ext.status === 'attended' ? `${baseBtn} btn-selected-attended` : `${baseBtn} text-slate-500 hover:bg-emerald-50 hover:text-emerald-600`;
                 const btnMis = ext.status === 'missed' ? `${baseBtn} btn-selected-missed` : `${baseBtn} text-slate-500 hover:bg-rose-50 hover:text-rose-600`;
+                const btnGt  = ext.status === 'gt' ? `${baseBtn} btn-selected-gt` : `${baseBtn} text-slate-500 hover:bg-purple-50 hover:text-purple-600`;
                 const btnCan = ext.status === 'cancelled' ? `${baseBtn} btn-selected-cancelled` : `${baseBtn} text-slate-500 hover:bg-slate-200 hover:text-slate-700`;
 
-                const accentColor = ext.status === 'attended' ? 'bg-emerald-500' : ext.status === 'missed' ? 'bg-rose-500' : ext.status === 'cancelled' ? 'bg-slate-500' : 'bg-indigo-500';
+                const accentColor = ext.status === 'attended' ? 'bg-emerald-500' : ext.status === 'missed' ? 'bg-rose-500' : ext.status === 'gt' ? 'bg-purple-500' : ext.status === 'cancelled' ? 'bg-slate-500' : 'bg-indigo-500';
                 
                 let badgeHTML = '<span class="text-[10px] font-black text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md ml-2 align-middle border border-indigo-200 tracking-wide uppercase">Extra Class</span>';
                 if (ext.replacedSlot !== null) {
@@ -1083,7 +1115,7 @@
                 }
 
                 listDiv.innerHTML += `
-                    <div class="group flex flex-col md:flex-row md:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
+                    <div class="group flex flex-col xl:flex-row xl:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300 ${accentColor}"></div>
                         
                         <div class="flex flex-col flex-1 pl-2">
@@ -1099,15 +1131,18 @@
                             </div>
                         </div>
 
-                        <div class="flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full md:w-auto gap-1">
+                        <div class="grid grid-cols-2 lg:flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full xl:w-auto gap-1">
                             <button onclick="markExtraClass(${ext.id}, 'attended')" class="${btnAtt}">
-                                <i class="fas fa-check"></i> <span>Attended</span>
+                                <i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span>
                             </button>
                             <button onclick="markExtraClass(${ext.id}, 'missed')" class="${btnMis}">
-                                <i class="fas fa-times"></i> <span>Missed</span>
+                                <i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span>
+                            </button>
+                            <button onclick="markExtraClass(${ext.id}, 'gt')" class="${btnGt}">
+                                <i class="fas fa-users-slash"></i> <span>GT</span>
                             </button>
                             <button onclick="markExtraClass(${ext.id}, 'cancelled')" class="${btnCan}">
-                                <i class="fas fa-minus"></i> <span>Cancelled</span>
+                                <i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span>
                             </button>
                         </div>
                     </div>
@@ -1132,20 +1167,28 @@
             }
 
             subjects.forEach(([name, data]) => {
-                const pct = calcPercent(data.attended, data.held);
-                const colorClass = getColorClass(pct, target);
-                const bgColorClass = getBgColorClass(pct, target);
+                // Calculation: GT as Absent
+                const pctAbsent = calcPercent(data.attended, data.held + data.gt);
+                const colorClassAbsent = getColorClass(pctAbsent, target);
+                const bgClassAbsent = getBgColorClass(pctAbsent, target);
+                
+                // Calculation: GT as Cancelled
+                const pctCancelled = calcPercent(data.attended, data.held);
+                const colorClassCancelled = getColorClass(pctCancelled, target);
+                const bgClassCancelled = getBgColorClass(pctCancelled, target);
 
                 let statusBadge = '';
-                if (data.held > 0) {
-                    let safeToMiss = Math.floor(data.attended / target) - data.held;
+                // Use the stricter 'Absent' metric for safe/miss recommendations
+                let strictHeld = data.held + data.gt;
+                if (strictHeld > 0) {
+                    let safeToMiss = Math.floor(data.attended / target) - strictHeld;
 
                     if (safeToMiss > 0) {
                         statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"><i class="fas fa-check-circle"></i> Safe to miss: ${safeToMiss}</span>`;
-                    } else if (safeToMiss === 0 && (data.attended / data.held) >= target) {
+                    } else if (safeToMiss === 0 && (data.attended / strictHeld) >= target) {
                         statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm"><i class="fas fa-exclamation-triangle"></i> Don't miss next</span>`;
                     } else {
-                        let needToAttend = Math.ceil((target * data.held - data.attended) / (1 - target));
+                        let needToAttend = Math.ceil((target * strictHeld - data.attended) / (1 - target));
                         statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm"><i class="fas fa-arrow-trend-up"></i> Need to attend: ${needToAttend}</span>`;
                     }
                 } else {
@@ -1157,17 +1200,33 @@
                         <div class="flex justify-between items-start mb-2">
                             <div class="overflow-hidden pr-2 flex-1">
                                 <p class="font-bold text-slate-800 text-sm break-words" title="${name}">${name}</p>
-                                <p class="text-xs text-slate-500 font-medium mt-1">Held: <span class="text-slate-700">${data.held}</span> &nbsp;|&nbsp; Attended: <span class="text-slate-700">${data.attended}</span></p>
+                                <p class="text-xs text-slate-500 font-medium mt-1">Attended: <span class="text-slate-700">${data.attended}</span> &nbsp;|&nbsp; Missed: <span class="text-slate-700">${data.missed}</span> &nbsp;|&nbsp; GT: <span class="text-slate-700">${data.gt}</span></p>
                                 <div class="mt-2.5">
                                     ${statusBadge}
                                 </div>
                             </div>
-                            <div class="text-right pl-3 flex flex-col justify-start">
-                                <p class="text-xl font-black ${colorClass}">${pct.toFixed(1)}%</p>
-                            </div>
                         </div>
-                        <div class="w-full bg-slate-200 rounded-full h-1.5 mt-2">
-                            <div class="${bgColorClass} h-1.5 rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                        
+                        <div class="flex flex-col gap-2.5 w-full mt-2">
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-slate-500">If GT is considered ABSENT</span>
+                                    <span class="${colorClassAbsent}">${pctAbsent.toFixed(1)}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="${bgClassAbsent} h-1.5 rounded-full transition-all duration-500" style="width: ${pctAbsent}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-[11px] font-bold mb-1">
+                                    <span class="text-slate-500">If GT is considered CANCELLED</span>
+                                    <span class="${colorClassCancelled}">${pctCancelled.toFixed(1)}%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 rounded-full h-1.5">
+                                    <div class="${bgClassCancelled} h-1.5 rounded-full transition-all duration-500" style="width: ${pctCancelled}%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1215,32 +1274,30 @@
             });
         }
 
-        function renderMissedClasses() {
-            const missedList = getMissedClasses();
-            const container = document.getElementById('missed-classes-list');
+        // Sub-function to build the UI for the individual missed lists
+        function renderMissedListCategory(listArray, containerId, emptyIcon, emptyColor, emptyMessage, borderColor, timeIconColor) {
+            const container = document.getElementById(containerId);
             if (!container) return; 
 
-            if (missedList.length === 0) {
+            if (listArray.length === 0) {
                 container.innerHTML = `
-                    <div class="flex flex-col justify-center items-center py-12 text-slate-400">
-                        <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-3">
-                            <i class="fas fa-check-circle text-2xl text-emerald-500"></i>
+                    <div class="flex flex-col justify-center items-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 border-dashed">
+                        <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                            <i class="${emptyIcon} text-xl ${emptyColor}"></i>
                         </div>
-                        <h3 class="text-slate-700 font-bold">No missed classes!</h3>
-                        <p class="text-sm mt-1">You have a perfect attendance record.</p>
+                        <p class="text-sm font-medium">${emptyMessage}</p>
                     </div>
                 `;
                 return;
             }
 
-            let html = '<div class="flex flex-col gap-6">';
+            let html = '<div class="flex flex-col gap-4">';
             let currentDateStr = "";
             let groupHtml = "";
 
-            missedList.forEach(item => {
+            listArray.forEach(item => {
                 const dateFormatted = item.dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
                 
-                // If it's a new date, close the previous group and start a new one
                 if (currentDateStr !== item.dateString) {
                     if (groupHtml !== "") {
                         html += groupHtml + '</div></div>';
@@ -1252,42 +1309,64 @@
                         : "";
 
                     groupHtml = `
-                        <div class="bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-4 border-b border-slate-200 gap-3">
-                                <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap">
-                                    <i class="far fa-calendar-alt text-rose-500 mr-2"></i>${dateFormatted}
-                                </h3>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-3 border-b border-slate-200 gap-3">
+                                <h4 class="text-sm font-bold text-slate-700 whitespace-nowrap">
+                                    <i class="far fa-calendar-alt text-slate-400 mr-2"></i>${dateFormatted}
+                                </h4>
                                 <div class="w-full md:w-1/2 lg:w-2/3">
-                                     <input type="text" placeholder="Reason for missing classes today..." value="${dailyReason.replace(/"/g, '&quot;')}" 
+                                     <input type="text" placeholder="Reason for missed classes..." value="${dailyReason.replace(/"/g, '&quot;')}" 
                                         onchange="saveDailyMissedReason('${item.dateString}', this.value)"
-                                        class="w-full text-sm bg-white border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-rose-200 focus:border-rose-400 outline-none transition-all placeholder:text-slate-400">
+                                        class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all placeholder:text-slate-400">
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-3">
+                            <div class="flex flex-col gap-2">
                     `;
                 }
 
                 const badge = item.type === 'extra' ? '<span class="text-[10px] ml-2 font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full border border-indigo-200 inline-block align-middle">Extra Class</span>' : '';
                 
-                // Add the class item into the current date group (Single vertical column)
                 groupHtml += `
-                    <div class="bg-white p-4 rounded-xl border border-rose-200 border-l-4 border-l-rose-500 flex flex-col gap-1 w-full">
+                    <div class="bg-white p-3.5 rounded-lg border border-slate-200 border-l-4 ${borderColor} flex flex-col gap-1 w-full shadow-sm hover:shadow transition-shadow">
                         <span class="font-bold text-slate-800 text-sm md:text-base leading-tight">${item.subject} ${badge}</span>
                         <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-                            <i class="far fa-clock text-rose-400"></i> 
+                            <i class="far fa-clock ${timeIconColor}"></i> 
                             <span>${item.time}</span>
                         </div>
                     </div>
                 `;
             });
             
-            // Close the final group
             if (groupHtml !== "") {
                 html += groupHtml + '</div></div>';
             }
             
             html += '</div>';
             container.innerHTML = html;
+        }
+
+        function renderMissedClasses() {
+            const missedList = getMissedClasses();
+            
+            renderMissedListCategory(
+                missedList.personal, 
+                'missed-classes-list-personal', 
+                'fas fa-check-circle', 
+                'text-emerald-500', 
+                'No personally missed classes! Good job.',
+                'border-l-rose-500',
+                'text-rose-400'
+            );
+
+            renderMissedListCategory(
+                missedList.gt, 
+                'missed-classes-list-gt', 
+                'fas fa-users', 
+                'text-slate-300', 
+                'No mass bunks recorded.',
+                'border-l-purple-500',
+                'text-purple-400'
+            );
         }
 
         // --- ACTIONS ---
