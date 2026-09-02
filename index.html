@@ -257,7 +257,7 @@
         </div>
 
         <!-- ================= MISSED CLASSES TAB ================= -->
-        <div id="section-missed" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in">
+        <div id="section-missed" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
@@ -269,21 +269,33 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Missed Type Toggle (GT / Personal) -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner border border-slate-200">
+                    <button onclick="switchMissedCategory('gt')" id="cat-missed-gt"
+                        class="px-8 py-2 bg-white text-purple-700 font-bold rounded-lg shadow-sm transition-all duration-300">
+                        GT
+                    </button>
+                    <button onclick="switchMissedCategory('personal')" id="cat-missed-personal"
+                        class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
+                        Personal Missed
+                    </button>
+                </div>
+            </div>
             
-            <div class="flex flex-col gap-10">
-                <!-- Personally Missed List -->
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-user-times text-rose-500"></i> Personally Missed</h3>
-                    <div id="missed-classes-list-personal" class="w-full">
-                        <!-- Missed classes injected via JS -->
+            <div class="w-full">
+                <!-- GT Missed List -->
+                <div id="wrapper-missed-gt" class="block">
+                    <div id="missed-classes-list-gt" class="w-full">
+                        <!-- GT classes injected via JS -->
                     </div>
                 </div>
 
-                <!-- GT Missed List -->
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-users-slash text-purple-500"></i> Mass Bunks (GT)</h3>
-                    <div id="missed-classes-list-gt" class="w-full">
-                        <!-- GT classes injected via JS -->
+                <!-- Personally Missed List -->
+                <div id="wrapper-missed-personal" class="hidden">
+                    <div id="missed-classes-list-personal" class="w-full">
+                        <!-- Missed classes injected via JS -->
                     </div>
                 </div>
             </div>
@@ -493,6 +505,8 @@
         
         // Subject Overview State
         let activeSubjectCategory = 'classes'; 
+        // Missed Category State
+        let activeMissedCategory = 'gt'; 
 
         // --- CUSTOM TOAST & DIALOG HELPERS ---
         function showToast(message, type = 'info') {
@@ -1187,6 +1201,33 @@
             renderSubjectStats(calculateStats());
         }
 
+        // Handle GT vs Personal Toggle in Missed Classes
+        function switchMissedCategory(cat) {
+            activeMissedCategory = cat;
+            const btnGt = document.getElementById('cat-missed-gt');
+            const btnPersonal = document.getElementById('cat-missed-personal');
+
+            const activeClassGt = "px-8 py-2 bg-white text-purple-700 font-bold rounded-lg shadow-sm transition-all duration-300";
+            const activeClassPersonal = "px-8 py-2 bg-white text-rose-600 font-bold rounded-lg shadow-sm transition-all duration-300";
+            const inactiveClass = "px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300";
+
+            if(cat === 'gt') {
+                btnGt.className = activeClassGt;
+                btnPersonal.className = inactiveClass;
+                document.getElementById('wrapper-missed-gt').classList.remove('hidden');
+                document.getElementById('wrapper-missed-gt').classList.add('block');
+                document.getElementById('wrapper-missed-personal').classList.add('hidden');
+                document.getElementById('wrapper-missed-personal').classList.remove('block');
+            } else {
+                btnPersonal.className = activeClassPersonal;
+                btnGt.className = inactiveClass;
+                document.getElementById('wrapper-missed-personal').classList.remove('hidden');
+                document.getElementById('wrapper-missed-personal').classList.add('block');
+                document.getElementById('wrapper-missed-gt').classList.add('hidden');
+                document.getElementById('wrapper-missed-gt').classList.remove('block');
+            }
+        }
+
         function renderSubjectStats(stats) {
             const listDiv = document.getElementById('subject-list');
             listDiv.innerHTML = '';
@@ -1330,8 +1371,8 @@
 
             if (listArray.length === 0) {
                 container.innerHTML = `
-                    <div class="flex flex-col justify-center items-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 border-dashed">
-                        <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                    <div class="flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed w-full">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm border border-slate-100">
                             <i class="${emptyIcon} text-xl ${emptyColor}"></i>
                         </div>
                         <p class="text-sm font-medium">${emptyMessage}</p>
@@ -1340,7 +1381,8 @@
                 return;
             }
 
-            let html = '<div class="flex flex-col gap-4">';
+            // Using grid layout to simulate the split screen visual logic from reference images on larger screens
+            let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">';
             let currentDateStr = "";
             let groupHtml = "";
 
@@ -1358,7 +1400,7 @@
                         : "";
 
                     groupHtml = `
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm w-full">
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-3 border-b border-slate-200 gap-3">
                                 <h4 class="text-sm font-bold text-slate-700 whitespace-nowrap">
                                     <i class="far fa-calendar-alt text-slate-400 mr-2"></i>${dateFormatted}
