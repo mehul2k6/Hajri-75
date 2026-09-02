@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        <!-- ================= DASHBOARD TAB (Upgraded Ergonomics) ================= -->
+        <!-- ================= DASHBOARD TAB ================= -->
         <div id="section-dashboard" class="max-w-4xl mx-auto block fade-in space-y-6 w-full">
             
             <!-- Date Navigator -->
@@ -213,7 +213,7 @@
         <!-- ================= SUBJECT OVERVIEW TAB ================= -->
         <div id="section-subjects" class="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
             
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
                         <i class="fas fa-chart-pie"></i>
@@ -237,7 +237,21 @@
                 </div>
             </div>
 
-            <div id="subject-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+            <!-- Subject Type Toggle (Classes / Labs) -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner border border-slate-200">
+                    <button onclick="switchSubjectCategory('classes')" id="cat-classes"
+                        class="px-8 py-2 bg-white text-indigo-700 font-bold rounded-lg shadow-sm transition-all duration-300">
+                        Classes
+                    </button>
+                    <button onclick="switchSubjectCategory('labs')" id="cat-labs"
+                        class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
+                        Labs
+                    </button>
+                </div>
+            </div>
+
+            <div id="subject-list" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Subjects injected via JS -->
             </div>
         </div>
@@ -476,6 +490,9 @@
         let currentUser = null;
         let isSignUpMode = false;
         let confirmResolver = null;
+        
+        // Subject Overview State
+        let activeSubjectCategory = 'classes'; 
 
         // --- CUSTOM TOAST & DIALOG HELPERS ---
         function showToast(message, type = 'info') {
@@ -1150,18 +1167,45 @@
             });
         }
 
+        // Handle Classes vs Labs Toggle in Subject Overview
+        function switchSubjectCategory(cat) {
+            activeSubjectCategory = cat;
+            const btnClasses = document.getElementById('cat-classes');
+            const btnLabs = document.getElementById('cat-labs');
+            
+            const activeClass = "px-8 py-2 bg-white text-indigo-700 font-bold rounded-lg shadow-sm transition-all duration-300";
+            const inactiveClass = "px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300";
+
+            if(cat === 'classes') {
+                btnClasses.className = activeClass;
+                btnLabs.className = inactiveClass;
+            } else {
+                btnLabs.className = activeClass;
+                btnClasses.className = inactiveClass;
+            }
+            
+            renderSubjectStats(calculateStats());
+        }
+
         function renderSubjectStats(stats) {
             const listDiv = document.getElementById('subject-list');
             listDiv.innerHTML = '';
 
             const target = appData.targetCriteria ? (appData.targetCriteria / 100) : 0.75;
-            const subjects = Object.entries(stats).sort((a, b) => a[0].localeCompare(b[0]));
+            
+            // Filter by Classes / Labs
+            const subjects = Object.entries(stats)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .filter(([name]) => {
+                    const isLab = name.toLowerCase().includes('lab');
+                    return activeSubjectCategory === 'labs' ? isLab : !isLab;
+                });
 
             if (subjects.length === 0) {
                 listDiv.innerHTML = `
-                    <div class="col-span-2 flex flex-col justify-center items-center py-8 text-slate-400">
-                        <i class="fas fa-folder-open text-3xl mb-2"></i>
-                        <p class="text-sm">No subjects found in timetable.</p>
+                    <div class="col-span-1 lg:col-span-2 flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+                        <i class="fas fa-folder-open text-3xl mb-3"></i>
+                        <p class="text-sm font-medium">No ${activeSubjectCategory} found in timetable.</p>
                     </div>`;
                 return;
             }
@@ -1184,49 +1228,54 @@
                     let safeToMiss = Math.floor(data.attended / target) - strictHeld;
 
                     if (safeToMiss > 0) {
-                        statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"><i class="fas fa-check-circle"></i> Safe to miss: ${safeToMiss}</span>`;
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"><i class="fas fa-check-circle"></i> Safe to miss: ${safeToMiss}</span>`;
                     } else if (safeToMiss === 0 && (data.attended / strictHeld) >= target) {
-                        statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm"><i class="fas fa-exclamation-triangle"></i> Don't miss next</span>`;
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm"><i class="fas fa-exclamation-triangle"></i> Don't miss next</span>`;
                     } else {
                         let needToAttend = Math.ceil((target * strictHeld - data.attended) / (1 - target));
-                        statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm"><i class="fas fa-arrow-trend-up"></i> Need to attend: ${needToAttend}</span>`;
+                        statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm"><i class="fas fa-arrow-trend-up"></i> Need to attend: ${needToAttend}</span>`;
                     }
                 } else {
-                    statusBadge = `<span class="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] sm:text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">No classes yet</span>`;
+                    statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">No classes yet</span>`;
                 }
 
+                // New UI mapping from the wireframe
                 listDiv.innerHTML += `
-                    <div class="p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-xl border border-slate-200 shadow-sm flex flex-col justify-center relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="overflow-hidden pr-2 flex-1">
-                                <p class="font-bold text-slate-800 text-sm break-words" title="${name}">${name}</p>
-                                <p class="text-xs text-slate-500 font-medium mt-1">Attended: <span class="text-slate-700">${data.attended}</span> &nbsp;|&nbsp; Missed: <span class="text-slate-700">${data.missed}</span> &nbsp;|&nbsp; GT: <span class="text-slate-700">${data.gt}</span></p>
-                                <div class="mt-2.5">
-                                    ${statusBadge}
-                                </div>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden transition-shadow hover:shadow-md">
+                        <!-- Top Details Section -->
+                        <div class="p-5 pb-4">
+                            <h3 class="font-extrabold text-slate-800 text-lg mb-1 break-words" title="${name}">${name}</h3>
+                            <p class="text-xs text-slate-500 font-medium">Attended: <span class="text-slate-700">${data.attended}</span> &nbsp;|&nbsp; Missed: <span class="text-slate-700">${data.missed}</span> &nbsp;|&nbsp; GT: <span class="text-slate-700">${data.gt}</span></p>
+                            <div class="mt-3">
+                                ${statusBadge}
                             </div>
                         </div>
                         
-                        <div class="flex flex-col gap-2.5 w-full mt-2">
-                            <div>
-                                <div class="flex justify-between text-[11px] font-bold mb-1">
-                                    <span class="text-slate-500">If GT is considered ABSENT</span>
-                                    <span class="${colorClassAbsent}">${pctAbsent.toFixed(1)}%</span>
+                        <!-- Bottom Split Section -->
+                        <div class="flex flex-row border-t border-slate-100 bg-slate-50/50 p-4 pt-3.5">
+                            
+                            <!-- GT as Absent -->
+                            <div class="flex-1 flex flex-col pr-4 border-r border-slate-200">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
+                                    <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wide">GT as Absent</span>
+                                    <span class="text-sm font-black ${colorClassAbsent}">${pctAbsent.toFixed(1)}%</span>
                                 </div>
-                                <div class="w-full bg-slate-200 rounded-full h-1.5">
-                                    <div class="${bgClassAbsent} h-1.5 rounded-full transition-all duration-500" style="width: ${pctAbsent}%"></div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="${bgClassAbsent} h-2 rounded-full transition-all duration-500" style="width: ${pctAbsent}%"></div>
                                 </div>
                             </div>
                             
-                            <div>
-                                <div class="flex justify-between text-[11px] font-bold mb-1">
-                                    <span class="text-slate-500">If GT is considered CANCELLED</span>
-                                    <span class="${colorClassCancelled}">${pctCancelled.toFixed(1)}%</span>
+                            <!-- GT as Cancelled -->
+                            <div class="flex-1 flex flex-col pl-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
+                                    <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wide">GT as Cancelled</span>
+                                    <span class="text-sm font-black ${colorClassCancelled}">${pctCancelled.toFixed(1)}%</span>
                                 </div>
-                                <div class="w-full bg-slate-200 rounded-full h-1.5">
-                                    <div class="${bgClassCancelled} h-1.5 rounded-full transition-all duration-500" style="width: ${pctCancelled}%"></div>
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="${bgClassCancelled} h-2 rounded-full transition-all duration-500" style="width: ${pctCancelled}%"></div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 `;
