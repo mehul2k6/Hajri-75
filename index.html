@@ -90,80 +90,71 @@
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
     </div>
 
+    <!-- Sidebar Menu Overlay -->
+    <div id="side-menu-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-40 transition-opacity"></div>
+    
+    <!-- Sidebar Menu Drawer -->
+    <div id="side-menu" class="fixed inset-y-0 left-0 transform -translate-x-full w-72 bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-100">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
+            <div>
+                <h2 class="text-2xl font-black text-blue-700 tracking-tight">Hajri-75</h2>
+                <p class="text-xs font-semibold text-blue-500 uppercase tracking-widest mt-1">Menu</p>
+            </div>
+            <button onclick="toggleMenu()" class="text-slate-400 hover:text-slate-700 bg-white shadow-sm border border-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="w-full text-left px-4 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl shadow-sm transition-all duration-300 flex items-center gap-3">
+                <i class="fas fa-calendar-day w-5 text-center"></i> Daily Log
+            </button>
+            <button onclick="switchTab('subjects')" id="tab-subjects" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
+                <i class="fas fa-chart-pie w-5 text-center"></i> Subject Overview
+            </button>
+            <button onclick="switchTab('missed')" id="tab-missed" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
+                <i class="fas fa-history w-5 text-center"></i> Missed Classes
+            </button>
+            <button onclick="switchTab('timetable')" id="tab-timetable" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
+                <i class="fas fa-table w-5 text-center"></i> Timetable
+            </button>
+            <div class="my-2 border-t border-slate-100"></div>
+            <button onclick="switchTab('profile')" id="tab-profile" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
+                <i class="fas fa-user-circle w-5 text-center"></i> Profile
+            </button>
+        </nav>
+    </div>
+
     <div class="max-w-7xl mx-auto space-y-8">
 
-        <!-- Header / Overall Stats -->
-        <header
-            class="bg-gradient-to-br from-indigo-600 via-blue-600 to-blue-700 p-6 md:p-8 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 text-white overflow-hidden relative">
-            <div
-                class="absolute -right-20 -top-20 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl pointer-events-none">
-            </div>
-
-            <div class="z-10 relative flex flex-col items-center md:items-start w-full md:w-auto">
-                <div class="flex items-center gap-3">
-                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Hajri-75</h1>
+        <!-- Top Header & Greeting -->
+        <header class="flex items-center gap-4 mb-6 md:mb-8">
+            <!-- Hamburger Menu Button -->
+            <button onclick="toggleMenu()" class="text-slate-600 hover:text-blue-600 bg-white shadow-sm border border-slate-200 w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 active:scale-95">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <div class="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <!-- Greeting -->
+                <div>
+                    <h1 id="greeting-text" class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800">Hello :)</h1>
+                    <p class="text-slate-500 text-sm font-medium mt-0.5">All Hail 75%</p>
                 </div>
-                <p class="text-blue-200 text-sm font-medium mt-1">All Hail 75% :)</p>
-            </div>
-
-            <div class="flex flex-col sm:flex-row items-center gap-4 z-10 w-full md:w-auto justify-center">
                 
-                <!-- Student Info Inputs (Replaced Stats) -->
-                <div class="flex flex-col sm:flex-row items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-inner w-full sm:w-auto justify-center">
-                    <div class="flex flex-col items-start border-b sm:border-b-0 sm:border-r border-white/20 pb-2 sm:pb-0 sm:pr-4 w-full sm:w-auto">
-                        <label class="text-[10px] text-blue-200 font-semibold uppercase tracking-wider mb-1">Name</label>
-                        <input type="text" id="student-name" onchange="updateStudentInfo('name', this.value)" placeholder="Enter Name" class="bg-transparent text-white font-bold text-sm focus:outline-none placeholder-blue-300/70 w-full sm:w-28 border-b border-transparent focus:border-white transition-colors">
-                    </div>
-                    <div class="flex flex-col items-start border-b sm:border-b-0 sm:border-r border-white/20 pb-2 sm:pb-0 sm:pr-4 w-full sm:w-auto">
-                        <label class="text-[10px] text-blue-200 font-semibold uppercase tracking-wider mb-1">Section</label>
-                        <input type="text" id="student-section" onchange="updateStudentInfo('section', this.value)" placeholder="Enter Section" class="bg-transparent text-white font-bold text-sm focus:outline-none placeholder-blue-300/70 w-full sm:w-28 border-b border-transparent focus:border-white transition-colors">
-                    </div>
-                    <div class="flex flex-col items-start w-full sm:w-auto">
-                        <label class="text-[10px] text-blue-200 font-semibold uppercase tracking-wider mb-1">Semester</label>
-                        <input type="text" id="student-semester" onchange="updateStudentInfo('semester', this.value)" placeholder="Enter Sem" class="bg-transparent text-white font-bold text-sm focus:outline-none placeholder-blue-300/70 w-full sm:w-28 border-b border-transparent focus:border-white transition-colors">
-                    </div>
-                </div>
-
-                <!-- Supabase Auth Profile Widget -->
-                <div
-                    class="flex flex-col items-center sm:items-end gap-1.5 bg-white/10 backdrop-blur-md p-3 px-4 rounded-xl border border-white/20 w-full sm:w-auto h-full justify-center">
+                <!-- Supabase Auth Profile Widget (Redesigned for Light Theme) -->
+                <div class="flex flex-col items-start sm:items-end gap-1.5 bg-white p-3 px-4 rounded-xl border border-slate-200 shadow-sm w-full sm:w-auto">
                     <div class="flex items-center gap-2">
-                        <div id="user-avatar"
-                            class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white">
+                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
                             <i class="fas fa-user"></i>
                         </div>
-                        <span id="user-display-email"
-                            class="text-xs text-blue-100 font-semibold max-w-[160px] truncate hidden">Guest User</span>
+                        <span id="user-display-email" class="text-xs text-slate-600 font-semibold max-w-[160px] truncate hidden">Guest User</span>
                     </div>
-                    <button id="header-auth-btn" onclick="openAuthModal()"
-                        class="w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
+                    <button id="header-auth-btn" onclick="openAuthModal()" class="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
                         <i class="fas fa-sign-in-alt"></i> <span>Log In</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Navigation Tabs -->
-        <div class="flex justify-center md:justify-start">
-            <div class="bg-slate-200/70 p-1.5 rounded-xl inline-flex shadow-inner flex-wrap justify-center gap-1">
-                <button onclick="switchTab('dashboard')" id="tab-dashboard"
-                    class="px-6 md:px-8 py-2.5 bg-white text-blue-700 font-bold rounded-lg shadow-sm transition-all duration-300">
-                    <i class="fas fa-calendar-day mr-2"></i>Daily Log
-                </button>
-                <button onclick="switchTab('subjects')" id="tab-subjects"
-                    class="px-6 md:px-8 py-2.5 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
-                    <i class="fas fa-chart-pie mr-2"></i>Subject Overview
-                </button>
-                <button onclick="switchTab('missed')" id="tab-missed"
-                    class="px-6 md:px-8 py-2.5 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
-                    <i class="fas fa-history mr-2"></i>Missed Classes
-                </button>
-                <button onclick="switchTab('timetable')" id="tab-timetable"
-                    class="px-6 md:px-8 py-2.5 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
-                    <i class="fas fa-table mr-2"></i>Timetable
-                </button>
-            </div>
-        </div>
 
         <!-- ================= DASHBOARD TAB ================= -->
         <div id="section-dashboard" class="max-w-4xl mx-auto block fade-in space-y-6 w-full">
@@ -207,6 +198,31 @@
                 </div>
                 <h3 class="text-slate-700 font-bold text-lg">Nothing scheduled here</h3>
                 <p id="no-classes-submsg" class="text-slate-500 text-sm mt-1">Enjoy your time off.</p>
+            </div>
+        </div>
+
+        <!-- ================= PROFILE SECTION TAB ================= -->
+        <div id="section-profile" class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shadow-sm"><i class="fas fa-user-edit text-lg"></i></div>
+                <h2 class="text-xl font-extrabold text-slate-800">Student Profile</h2>
+            </div>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Name</label>
+                    <input type="text" id="profile-student-name" oninput="updateStudentInfo('name', this.value)" placeholder="Enter your full name" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Section</label>
+                        <input type="text" id="profile-student-section" oninput="updateStudentInfo('section', this.value)" placeholder="E.g. Mech - Section 1" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Semester</label>
+                        <input type="text" id="profile-student-semester" oninput="updateStudentInfo('semester', this.value)" placeholder="E.g. 3rd" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -581,7 +597,7 @@
             } else {
                 emailSpan.classList.add('hidden');
                 avatar.innerHTML = `<i class="fas fa-user"></i>`;
-                avatar.className = "w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold text-white";
+                avatar.className = "w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500";
                 authBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Log In</span>`;
             }
         }
@@ -768,7 +784,10 @@
         }
 
         function updateStudentInfo(field, val) {
-            if (field === 'name') appData.studentName = val;
+            if (field === 'name') {
+                appData.studentName = val;
+                renderGreeting();
+            }
             if (field === 'section') appData.studentSection = val;
             if (field === 'semester') appData.studentSemester = val;
             saveData();
@@ -932,35 +951,59 @@
             showToast("Reason saved", "success");
         }
 
-        // --- TAB SWITCHING ---
+        // --- TAB SWITCHING & MENU NAVIGATION ---
+        function toggleMenu() {
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('side-menu-overlay');
+            menu.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
         function switchTab(tabName) {
-            document.getElementById('section-dashboard').classList.toggle('hidden', tabName !== 'dashboard');
-            document.getElementById('section-dashboard').classList.toggle('block', tabName === 'dashboard');
+            const sections = ['dashboard', 'subjects', 'missed', 'timetable', 'profile'];
             
-            document.getElementById('section-subjects').classList.toggle('hidden', tabName !== 'subjects');
-            document.getElementById('section-subjects').classList.toggle('block', tabName === 'subjects');
-            
-            document.getElementById('section-missed').classList.toggle('hidden', tabName !== 'missed');
-            document.getElementById('section-missed').classList.toggle('block', tabName === 'missed');
-            
-            document.getElementById('section-timetable').classList.toggle('hidden', tabName !== 'timetable');
-            document.getElementById('section-timetable').classList.toggle('block', tabName === 'timetable');
+            sections.forEach(section => {
+                const el = document.getElementById(`section-${section}`);
+                if(el) {
+                    el.classList.toggle('hidden', tabName !== section);
+                    el.classList.toggle('block', tabName === section);
+                }
+            });
 
-            const activeClass = "px-6 md:px-8 py-2.5 bg-white text-blue-700 font-bold rounded-lg shadow-sm transition-all duration-300";
-            const inactiveClass = "px-6 md:px-8 py-2.5 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300";
+            const activeClass = "w-full text-left px-4 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl shadow-sm transition-all duration-300 flex items-center gap-3";
+            const inactiveClass = "w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3";
 
-            document.getElementById('tab-dashboard').className = tabName === 'dashboard' ? activeClass : inactiveClass;
-            document.getElementById('tab-subjects').className = tabName === 'subjects' ? activeClass : inactiveClass;
-            document.getElementById('tab-missed').className = tabName === 'missed' ? activeClass : inactiveClass;
-            document.getElementById('tab-timetable').className = tabName === 'timetable' ? activeClass : inactiveClass;
+            sections.forEach(section => {
+                const tab = document.getElementById(`tab-${section}`);
+                if (tab) {
+                    tab.className = tabName === section ? activeClass : inactiveClass;
+                }
+            });
+            
+            // Auto close the sidebar if it's currently open
+            const menu = document.getElementById('side-menu');
+            if(!menu.classList.contains('-translate-x-full')){
+                toggleMenu();
+            }
         }
 
         // --- RENDERING FUNCTIONS ---
+        function renderGreeting() {
+            const name = appData.studentName ? appData.studentName.trim() : "";
+            const greetingEl = document.getElementById('greeting-text');
+            if (name) {
+                greetingEl.innerText = `Hello ${name.split(' ')[0]} :)`;
+            } else {
+                greetingEl.innerText = `Hello :)`;
+            }
+        }
+
         function renderAll() {
-            document.getElementById('student-name').value = appData.studentName || "";
-            document.getElementById('student-section').value = appData.studentSection || "";
-            document.getElementById('student-semester').value = appData.studentSemester || "";
+            document.getElementById('profile-student-name').value = appData.studentName || "";
+            document.getElementById('profile-student-section').value = appData.studentSection || "";
+            document.getElementById('profile-student-semester').value = appData.studentSemester || "";
             
+            renderGreeting();
             const stats = calculateStats();
             renderDateUI();
             renderDailyClasses();
@@ -1280,7 +1323,6 @@
                     statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">No classes yet</span>`;
                 }
 
-                // New UI mapping from the wireframe
                 listDiv.innerHTML += `
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden transition-shadow hover:shadow-md">
                         <!-- Top Details Section -->
@@ -1381,7 +1423,6 @@
                 return;
             }
 
-            // Using grid layout to simulate the split screen visual logic from reference images on larger screens
             let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">';
             let currentDateStr = "";
             let groupHtml = "";
