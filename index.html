@@ -19,20 +19,13 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Upgraded Button Selected States for Segmented Controls */
+        /* Segmented Control Button States */
         .btn-selected-attended {
-            background-color: #10b981 !important; /* emerald-500 */
+            background-color: #10b981 !important;
             color: white !important;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
             transform: scale(1.02);
@@ -40,7 +33,7 @@
         }
 
         .btn-selected-missed {
-            background-color: #f43f5e !important; /* rose-500 */
+            background-color: #f43f5e !important;
             color: white !important;
             box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
             transform: scale(1.02);
@@ -48,7 +41,7 @@
         }
 
         .btn-selected-cancelled {
-            background-color: #64748b !important; /* slate-500 */
+            background-color: #64748b !important;
             color: white !important;
             box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
             transform: scale(1.02);
@@ -56,121 +49,91 @@
         }
 
         .btn-selected-gt {
-            background-color: #a855f7 !important; /* purple-500 */
+            background-color: #a855f7 !important;
             color: white !important;
             box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
             transform: scale(1.02);
             z-index: 10;
         }
 
-        /* Custom scrollbar for horizontal tables */
-        ::-webkit-scrollbar {
-            height: 6px;
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 font-sans p-4 md:p-6 lg:p-8 min-h-screen relative">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen relative flex flex-col">
 
     <!-- Global Notification Toast Container -->
-    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
-    </div>
+    <div id="toast-container" class="fixed top-4 right-4 z-[60] flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
-    <!-- Sidebar Menu Overlay -->
-    <div id="side-menu-overlay" onclick="toggleMenu()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-40 transition-opacity"></div>
-    
-    <!-- Sidebar Menu Drawer -->
-    <div id="side-menu" class="fixed inset-y-0 left-0 transform -translate-x-full w-72 bg-white shadow-2xl z-50 transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-100">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50/50">
-            <div>
+    <!-- Top App Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm h-16">
+        <!-- Three-bar menu button -->
+        <button onclick="toggleSidebar()" class="w-10 h-10 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors active:scale-95">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <!-- Center Greeting -->
+        <h1 class="text-lg md:text-xl font-extrabold text-slate-800 absolute left-1/2 transform -translate-x-1/2 w-max tracking-tight" id="greeting-title">
+            Hello :)
+        </h1>
+        
+        <!-- Placeholder to balance flexbox -->
+        <div class="w-10"></div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/40 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Sidebar (Drawer) -->
+    <nav id="sidebar" class="fixed inset-y-0 left-0 w-64 md:w-72 bg-white shadow-2xl z-50 transform -translate-x-full transition-transform duration-300 flex flex-col border-r border-slate-200">
+        <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-gradient-to-br from-blue-50 to-indigo-50">
+            <div class="flex flex-col">
                 <h2 class="text-2xl font-black text-blue-700 tracking-tight">Hajri-75</h2>
-                <p class="text-xs font-semibold text-blue-500 uppercase tracking-widest mt-1">Menu</p>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-blue-500 mt-1">All Hail 75%</span>
             </div>
-            <button onclick="toggleMenu()" class="text-slate-400 hover:text-slate-700 bg-white shadow-sm border border-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
-                <i class="fas fa-times"></i>
+            <button onclick="toggleSidebar()" class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-rose-500 hover:bg-white shadow-sm transition-all"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1.5">
+            <button onclick="switchTab('dashboard'); toggleSidebar()" id="tab-dashboard" class="flex items-center w-full px-4 py-3 bg-blue-50 text-blue-700 font-bold rounded-xl transition-colors">
+                <i class="fas fa-calendar-day w-6 text-center mr-2 text-lg"></i> Daily Log
+            </button>
+            <button onclick="switchTab('subjects'); toggleSidebar()" id="tab-subjects" class="flex items-center w-full px-4 py-3 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-colors">
+                <i class="fas fa-chart-pie w-6 text-center mr-2 text-lg"></i> Subject Overview
+            </button>
+            <button onclick="switchTab('missed'); toggleSidebar()" id="tab-missed" class="flex items-center w-full px-4 py-3 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-colors">
+                <i class="fas fa-history w-6 text-center mr-2 text-lg"></i> Missed Classes
+            </button>
+            <button onclick="switchTab('timetable'); toggleSidebar()" id="tab-timetable" class="flex items-center w-full px-4 py-3 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-colors">
+                <i class="fas fa-table w-6 text-center mr-2 text-lg"></i> Timetable
+            </button>
+            
+            <div class="my-2 border-t border-slate-100"></div>
+            
+            <button onclick="switchTab('profile'); toggleSidebar()" id="tab-profile" class="flex items-center w-full px-4 py-3 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-colors">
+                <i class="fas fa-user-circle w-6 text-center mr-2 text-lg"></i> Profile Settings
             </button>
         </div>
-        <nav class="flex-1 overflow-y-auto p-4 space-y-2">
-            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="w-full text-left px-4 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl shadow-sm transition-all duration-300 flex items-center gap-3">
-                <i class="fas fa-calendar-day w-5 text-center"></i> Daily Log
-            </button>
-            <button onclick="switchTab('subjects')" id="tab-subjects" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
-                <i class="fas fa-chart-pie w-5 text-center"></i> Subject Overview
-            </button>
-            <button onclick="switchTab('missed')" id="tab-missed" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
-                <i class="fas fa-history w-5 text-center"></i> Missed Classes
-            </button>
-            <button onclick="switchTab('timetable')" id="tab-timetable" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
-                <i class="fas fa-table w-5 text-center"></i> Timetable
-            </button>
-            <div class="my-2 border-t border-slate-100"></div>
-            <button onclick="switchTab('profile')" id="tab-profile" class="w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3">
-                <i class="fas fa-user-circle w-5 text-center"></i> Profile
-            </button>
-        </nav>
-    </div>
+    </nav>
 
-    <div class="max-w-7xl mx-auto space-y-8">
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 md:p-6 lg:p-8 w-full max-w-7xl mx-auto space-y-6">
 
-        <!-- Top Header & Greeting -->
-        <header class="flex items-center gap-4 mb-6 md:mb-8">
-            <!-- Hamburger Menu Button -->
-            <button onclick="toggleMenu()" class="text-slate-600 hover:text-blue-600 bg-white shadow-sm border border-slate-200 w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 active:scale-95">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            
-            <div class="flex-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <!-- Greeting -->
-                <div>
-                    <h1 id="greeting-text" class="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-800">Hello :)</h1>
-                    <p class="text-slate-500 text-sm font-medium mt-0.5">All Hail 75%</p>
-                </div>
-                
-                <!-- Supabase Auth Profile Widget (Redesigned for Light Theme) -->
-                <div class="flex flex-col items-start sm:items-end gap-1.5 bg-white p-3 px-4 rounded-xl border border-slate-200 shadow-sm w-full sm:w-auto">
-                    <div class="flex items-center gap-2">
-                        <div id="user-avatar" class="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <span id="user-display-email" class="text-xs text-slate-600 font-semibold max-w-[160px] truncate hidden">Guest User</span>
-                    </div>
-                    <button id="header-auth-btn" onclick="openAuthModal()" class="w-full sm:w-auto bg-blue-50 hover:bg-blue-100 text-blue-700 px-3.5 py-1.5 rounded-lg text-[11px] font-bold transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5">
-                        <i class="fas fa-sign-in-alt"></i> <span>Log In</span>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-
-        <!-- ================= DASHBOARD TAB ================= -->
-        <div id="section-dashboard" class="max-w-4xl mx-auto block fade-in space-y-6 w-full">
-            
+        <!-- ================= DASHBOARD TAB (Home Screen) ================= -->
+        <div id="section-dashboard" class="max-w-4xl mx-auto block fade-in w-full space-y-6">
             <!-- Date Navigator -->
             <div class="flex items-center justify-between bg-white px-3 py-3 rounded-2xl border border-slate-200 shadow-sm ring-1 ring-slate-900/5">
-                <button id="btn-prev-date" onclick="changeDate(-1)"
-                    class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
+                <button id="btn-prev-date" onclick="changeDate(-1)" class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
                     <i class="fas fa-chevron-left text-lg"></i>
                 </button>
                 <div class="text-center cursor-default flex flex-col items-center">
                     <span id="display-date" class="font-black text-slate-800 text-lg md:text-xl tracking-tight"></span>
                     <span id="display-day" class="text-[10px] md:text-xs text-blue-600 font-black tracking-widest uppercase bg-blue-50 px-2.5 py-0.5 rounded-full mt-1"></span>
                 </div>
-                <button id="btn-next-date" onclick="changeDate(1)"
-                    class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors active:scale-95">
+                <button id="btn-next-date" onclick="changeDate(1)" class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-600 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors active:scale-95">
                     <i class="fas fa-chevron-right text-lg"></i>
                 </button>
             </div>
@@ -180,8 +143,7 @@
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm"><i class="fas fa-calendar-day text-lg"></i></div>
                     <h2 class="text-2xl font-black text-slate-800 tracking-tight">Daily Log</h2>
-                    <span id="holiday-badge"
-                        class="hidden bg-emerald-100 text-emerald-700 text-xs font-black px-2.5 py-1 rounded-md tracking-wider shadow-sm">OFF</span>
+                    <span id="holiday-badge" class="hidden bg-emerald-100 text-emerald-700 text-xs font-black px-2.5 py-1 rounded-md tracking-wider shadow-sm">OFF</span>
                 </div>
                 <div id="day-action-buttons" class="flex flex-wrap gap-2 w-full sm:w-auto">
                     <!-- Buttons injected via JS -->
@@ -201,48 +163,17 @@
             </div>
         </div>
 
-        <!-- ================= PROFILE SECTION TAB ================= -->
-        <div id="section-profile" class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
-                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 shadow-sm"><i class="fas fa-user-edit text-lg"></i></div>
-                <h2 class="text-xl font-extrabold text-slate-800">Student Profile</h2>
-            </div>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Name</label>
-                    <input type="text" id="profile-student-name" oninput="updateStudentInfo('name', this.value)" placeholder="Enter your full name" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Section</label>
-                        <input type="text" id="profile-student-section" oninput="updateStudentInfo('section', this.value)" placeholder="E.g. Mech - Section 1" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Semester</label>
-                        <input type="text" id="profile-student-semester" oninput="updateStudentInfo('semester', this.value)" placeholder="E.g. 3rd" class="w-full bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white outline-none transition-all">
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ================= SUBJECT OVERVIEW TAB ================= -->
         <div id="section-subjects" class="max-w-5xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
-            
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                        <i class="fas fa-chart-pie"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600"><i class="fas fa-chart-pie"></i></div>
                     <h2 class="text-xl font-extrabold text-slate-800">Subject-wise Breakdown</h2>
                 </div>
-
                 <!-- Target Criteria Selector -->
                 <div class="flex items-center gap-2 text-sm bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                    <label for="target-criteria" class="font-bold text-slate-600"><i
-                            class="fas fa-bullseye text-indigo-400 mr-1"></i> Target:</label>
-                    <select id="target-criteria" onchange="updateCriteria(this.value)"
-                        class="bg-transparent font-extrabold text-indigo-600 outline-none cursor-pointer">
+                    <label for="target-criteria" class="font-bold text-slate-600"><i class="fas fa-bullseye text-indigo-400 mr-1"></i> Target:</label>
+                    <select id="target-criteria" onchange="updateCriteria(this.value)" class="bg-transparent font-extrabold text-indigo-600 outline-none cursor-pointer">
                         <option value="60">60%</option>
                         <option value="65">65%</option>
                         <option value="70">70%</option>
@@ -253,17 +184,10 @@
                 </div>
             </div>
 
-            <!-- Subject Type Toggle (Classes / Labs) -->
             <div class="flex justify-center mb-8">
                 <div class="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner border border-slate-200">
-                    <button onclick="switchSubjectCategory('classes')" id="cat-classes"
-                        class="px-8 py-2 bg-white text-indigo-700 font-bold rounded-lg shadow-sm transition-all duration-300">
-                        Classes
-                    </button>
-                    <button onclick="switchSubjectCategory('labs')" id="cat-labs"
-                        class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
-                        Labs
-                    </button>
+                    <button onclick="switchSubjectCategory('classes')" id="cat-classes" class="px-8 py-2 bg-white text-indigo-700 font-bold rounded-lg shadow-sm transition-all duration-300">Classes</button>
+                    <button onclick="switchSubjectCategory('labs')" id="cat-labs" class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">Labs</button>
                 </div>
             </div>
 
@@ -276,9 +200,7 @@
         <div id="section-missed" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
-                        <i class="fas fa-history"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600"><i class="fas fa-history"></i></div>
                     <div>
                         <h2 class="text-xl font-extrabold text-slate-800">Missed Classes History</h2>
                         <p class="text-sm text-slate-500 font-medium">A timeline of classes you have missed, sorted by day.</p>
@@ -286,75 +208,100 @@
                 </div>
             </div>
 
-            <!-- Missed Type Toggle (GT / Personal) -->
             <div class="flex justify-center mb-8">
                 <div class="bg-slate-100 p-1 rounded-xl inline-flex shadow-inner border border-slate-200">
-                    <button onclick="switchMissedCategory('gt')" id="cat-missed-gt"
-                        class="px-8 py-2 bg-white text-purple-700 font-bold rounded-lg shadow-sm transition-all duration-300">
-                        GT
-                    </button>
-                    <button onclick="switchMissedCategory('personal')" id="cat-missed-personal"
-                        class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">
-                        Personal Missed
-                    </button>
+                    <button onclick="switchMissedCategory('gt')" id="cat-missed-gt" class="px-8 py-2 bg-white text-purple-700 font-bold rounded-lg shadow-sm transition-all duration-300">GT</button>
+                    <button onclick="switchMissedCategory('personal')" id="cat-missed-personal" class="px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300">Personal Missed</button>
                 </div>
             </div>
             
             <div class="w-full">
-                <!-- GT Missed List -->
                 <div id="wrapper-missed-gt" class="block">
-                    <div id="missed-classes-list-gt" class="w-full">
-                        <!-- GT classes injected via JS -->
-                    </div>
+                    <div id="missed-classes-list-gt" class="w-full"></div>
                 </div>
-
-                <!-- Personally Missed List -->
                 <div id="wrapper-missed-personal" class="hidden">
-                    <div id="missed-classes-list-personal" class="w-full">
-                        <!-- Missed classes injected via JS -->
-                    </div>
+                    <div id="missed-classes-list-personal" class="w-full"></div>
                 </div>
             </div>
         </div>
 
         <!-- ================= TIMETABLE TAB ================= -->
-        <div id="section-timetable"
-            class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in">
-            <div
-                class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+        <div id="section-timetable" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <i class="fas fa-edit"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i class="fas fa-edit"></i></div>
                     <div>
                         <h2 class="text-xl font-extrabold text-slate-800">Timetable Editor</h2>
                         <p class="text-sm text-slate-500 font-medium">Customize your weekly schedule here.</p>
                     </div>
                 </div>
-                <button onclick="saveTimetable()"
-                    class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-blue-600/20 transition-all duration-200">
+                <button onclick="saveTimetable()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-2.5 px-6 rounded-xl shadow-md shadow-blue-600/20 transition-all duration-200">
                     <i class="fas fa-save mr-2"></i>Save Changes
                 </button>
             </div>
-
             <div class="overflow-x-auto pb-4">
                 <table class="w-full text-left border-collapse min-w-[900px]">
                     <thead>
-                        <tr id="timetable-headers" class="bg-slate-50 border-y border-slate-200">
-                            <!-- Headers injected via JS -->
-                        </tr>
+                        <tr id="timetable-headers" class="bg-slate-50 border-y border-slate-200"></tr>
                     </thead>
-                    <tbody id="timetable-body">
-                        <!-- Rows injected via JS -->
-                    </tbody>
+                    <tbody id="timetable-body"></tbody>
                 </table>
             </div>
         </div>
-    </div>
+        
+        <!-- ================= PROFILE TAB ================= -->
+        <div id="section-profile" class="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 hidden fade-in w-full">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-6">
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-800">Profile Details</h2>
+                    <p class="text-sm text-slate-500 font-medium">Manage your personal information and account.</p>
+                </div>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" id="student-name" oninput="updateStudentInfo('name', this.value)" placeholder="Enter your name" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Section / Branch</label>
+                        <input type="text" id="student-section" onchange="updateStudentInfo('section', this.value)" placeholder="Enter Section" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Semester</label>
+                        <input type="text" id="student-semester" onchange="updateStudentInfo('semester', this.value)" placeholder="Enter Semester" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Cloud Sync & Account</h3>
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <div id="user-avatar" class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500 shadow-sm border border-slate-300">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span id="user-display-email" class="text-sm text-slate-800 font-bold truncate hidden">Guest User</span>
+                            <span id="guest-label" class="text-sm text-slate-500 font-bold">Not logged in</span>
+                            <span class="text-xs text-slate-400 font-medium mt-0.5">Sync data across devices</span>
+                        </div>
+                    </div>
+                    <button id="header-auth-btn" onclick="openAuthModal()" class="w-full sm:w-auto bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-sm active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i> <span>Log In / Sign Up</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <!-- ================= AUTHENTICATION MODAL ================= -->
-    <div id="auth-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center fade-in p-4">
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-white flex justify-between items-center">
                 <h3 id="auth-modal-title" class="font-extrabold text-lg flex items-center gap-2">
@@ -366,106 +313,78 @@
             </div>
 
             <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="p-6 space-y-4">
-                <!-- Inline Alert Banner inside Auth Modal -->
                 <div id="auth-alert" class="hidden text-xs p-3 rounded-lg border font-semibold"></div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email
-                        Address</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
                     <div class="relative">
                         <i class="fas fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="email" id="auth-email" required placeholder="name@mail.edu"
-                            class="w-full pl-10 pr-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <input type="email" id="auth-email" required placeholder="name@mail.edu" class="w-full pl-10 pr-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
-
                 <div>
-                    <label
-                        class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
                     <div class="relative">
                         <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
-                        <input type="password" id="auth-password" required minlength="6" placeholder="••••••••"
-                            class="w-full pl-10 pr-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                        <input type="password" id="auth-password" required minlength="6" placeholder="••••••••" class="w-full pl-10 pr-3 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
-
-                <button type="submit" id="auth-submit-btn"
-                    class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
+                <button type="submit" id="auth-submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
                     <span id="auth-btn-text">Log In</span>
                     <i id="auth-spinner" class="fas fa-circle-notch fa-spin hidden"></i>
                 </button>
-
                 <div class="text-center pt-2 text-xs text-slate-500">
                     <span id="auth-toggle-msg">Don't have an account?</span>
-                    <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn"
-                        class="text-blue-600 font-bold hover:underline ml-1">
-                        Sign Up
-                    </button>
+                    <button type="button" onclick="toggleAuthMode()" id="auth-toggle-btn" class="text-blue-600 font-bold hover:underline ml-1">Sign Up</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- ================= EXTRA CLASS MODAL ================= -->
-    <div id="extra-class-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center fade-in p-4">
+    <div id="extra-class-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
             <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
                 <h3 class="font-bold text-lg"><i class="fas fa-plus-circle mr-2"></i>Add Extra Class</h3>
-                <button onclick="closeExtraClassModal()" class="text-indigo-200 hover:text-white transition"><i
-                        class="fas fa-times text-xl"></i></button>
+                <button onclick="closeExtraClassModal()" class="text-indigo-200 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
             </div>
             <div class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Subject</label>
-                    <select id="extra-subject"
-                        class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    <select id="extra-subject" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Timings</label>
-                    <input type="text" id="extra-time" placeholder="e.g. 1:00 PM - 2:00 PM"
-                        class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="extra-time" placeholder="e.g. 1:00 PM - 2:00 PM" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div class="pt-2">
                     <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="extra-is-exchange" onchange="toggleExchangeDropdown()"
-                            class="w-4 h-4 text-indigo-600 border-slate-300 rounded cursor-pointer">
+                        <input type="checkbox" id="extra-is-exchange" onchange="toggleExchangeDropdown()" class="w-4 h-4 text-indigo-600 border-slate-300 rounded cursor-pointer">
                         <span class="text-sm font-bold text-slate-700">Exchange/Replace existing class today?</span>
                     </label>
                 </div>
                 <div id="exchange-dropdown-container" class="hidden">
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Select class to replace:</label>
-                    <select id="extra-replace-slot"
-                        class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+                    <select id="extra-replace-slot" class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
                 </div>
                 <div class="pt-4 flex gap-3">
-                    <button onclick="closeExtraClassModal()"
-                        class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-lg hover:bg-slate-200 transition">Cancel</button>
-                    <button onclick="saveExtraClass()"
-                        class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 shadow-md transition">Add
-                        Class</button>
+                    <button onclick="closeExtraClassModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-lg hover:bg-slate-200 transition">Cancel</button>
+                    <button onclick="saveExtraClass()" class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 shadow-md transition">Add Class</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ================= CONFIRMATION MODAL ================= -->
-    <div id="confirm-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center fade-in p-4">
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden p-6 space-y-4 text-center">
-            <div
-                class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-xl"><i class="fas fa-exclamation-triangle"></i></div>
             <div>
                 <h3 id="confirm-modal-title" class="font-bold text-slate-800 text-lg">Are you sure?</h3>
                 <p id="confirm-modal-msg" class="text-xs text-slate-500 mt-1">This action cannot be undone.</p>
             </div>
             <div class="flex gap-3 pt-2">
-                <button id="confirm-btn-cancel" onclick="closeConfirmModal(false)"
-                    class="flex-1 bg-slate-100 text-slate-700 font-bold py-2 rounded-lg hover:bg-slate-200 transition text-sm">Cancel</button>
-                <button id="confirm-btn-ok" onclick="closeConfirmModal(true)"
-                    class="flex-1 bg-rose-600 text-white font-bold py-2 rounded-lg hover:bg-rose-700 shadow transition text-sm">Confirm</button>
+                <button id="confirm-btn-cancel" onclick="closeConfirmModal(false)" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2 rounded-lg hover:bg-slate-200 transition text-sm">Cancel</button>
+                <button id="confirm-btn-ok" onclick="closeConfirmModal(true)" class="flex-1 bg-rose-600 text-white font-bold py-2 rounded-lg hover:bg-rose-700 shadow transition text-sm">Confirm</button>
             </div>
         </div>
     </div>
@@ -494,13 +413,8 @@
             studentSemester: "",
             targetCriteria: 75,
             slotTimings: [
-                "9:00 - 10:00 AM",
-                "10:00 - 11:00 AM",
-                "11:00 - 12:00 PM",
-                "12:00 - 1:00 PM",
-                "2:30 - 3:30 PM",
-                "3:30 - 4:30 PM",
-                "4:30 - 5:30 PM"
+                "9:00 - 10:00 AM", "10:00 - 11:00 AM", "11:00 - 12:00 PM",
+                "12:00 - 1:00 PM", "2:30 - 3:30 PM", "3:30 - 4:30 PM", "4:30 - 5:30 PM"
             ],
             schedule: {
                 "Monday": { holiday: false, slots: ["Mechanism of Machines", "Applied Numerical Methods", "Engineering Thermodynamics", "Mechanics of Materials", "", "", ""] },
@@ -519,16 +433,28 @@
         let isSignUpMode = false;
         let confirmResolver = null;
         
-        // Subject Overview State
         let activeSubjectCategory = 'classes'; 
-        // Missed Category State
         let activeMissedCategory = 'gt'; 
+        let isSidebarOpen = false;
+
+        // --- SIDEBAR TOGGLE ---
+        function toggleSidebar() {
+            isSidebarOpen = !isSidebarOpen;
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
 
         // --- CUSTOM TOAST & DIALOG HELPERS ---
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-
             let bgClass = 'bg-slate-800 text-white';
             let icon = 'fa-info-circle';
 
@@ -537,7 +463,6 @@
 
             toast.className = `${bgClass} p-3 px-4 rounded-xl shadow-lg text-xs font-bold flex items-center gap-2.5 transition-all duration-300 fade-in pointer-events-auto`;
             toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
-
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -549,9 +474,7 @@
             document.getElementById('confirm-modal-title').innerText = title;
             document.getElementById('confirm-modal-msg').innerText = msg;
             document.getElementById('confirm-modal').classList.remove('hidden');
-            return new Promise((resolve) => {
-                confirmResolver = resolve;
-            });
+            return new Promise((resolve) => { confirmResolver = resolve; });
         }
 
         function closeConfirmModal(result) {
@@ -568,11 +491,9 @@
                 loadDataFromCloud();
                 return;
             }
-
             const { data: { session } } = await supabaseClient.auth.getSession();
             currentUser = session ? session.user : null;
             updateHeaderAuthUI();
-
             loadDataFromCloud();
 
             supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -585,20 +506,23 @@
 
         function updateHeaderAuthUI() {
             const emailSpan = document.getElementById('user-display-email');
+            const guestLabel = document.getElementById('guest-label');
             const authBtn = document.getElementById('header-auth-btn');
             const avatar = document.getElementById('user-avatar');
 
             if (currentUser) {
                 emailSpan.innerText = currentUser.email;
                 emailSpan.classList.remove('hidden');
+                guestLabel.classList.add('hidden');
                 avatar.innerHTML = currentUser.email.charAt(0).toUpperCase();
-                avatar.className = "w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center text-xs font-extrabold text-white uppercase shadow-sm";
+                avatar.className = "w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-lg font-extrabold text-white uppercase shadow-sm";
                 authBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> <span>Log Out</span>`;
             } else {
                 emailSpan.classList.add('hidden');
+                guestLabel.classList.remove('hidden');
                 avatar.innerHTML = `<i class="fas fa-user"></i>`;
-                avatar.className = "w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-500";
-                authBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Log In</span>`;
+                avatar.className = "w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500 shadow-sm border border-slate-300";
+                authBtn.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Log In / Sign Up</span>`;
             }
         }
 
@@ -622,9 +546,7 @@
             const submitBtnText = document.getElementById('auth-btn-text');
             const toggleMsg = document.getElementById('auth-toggle-msg');
             const toggleBtn = document.getElementById('auth-toggle-btn');
-
             hideAuthAlert();
-
             if (isSignUpMode) {
                 title.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
                 submitBtnText.innerText = 'Sign Up';
@@ -648,10 +570,9 @@
         async function handleAuthSubmit(event) {
             event.preventDefault();
             if (!supabaseClient) {
-                showAuthAlert("Supabase credentials not configured in script head.", "error");
+                showAuthAlert("Supabase credentials not configured.", "error");
                 return;
             }
-
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const spinner = document.getElementById('auth-spinner');
@@ -684,58 +605,37 @@
         function showAuthAlert(message, type) {
             const alertBox = document.getElementById('auth-alert');
             alertBox.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'border-rose-200', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
-            if (type === 'error') {
-                alertBox.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200');
-            } else {
-                alertBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
-            }
+            if (type === 'error') { alertBox.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-200'); } 
+            else { alertBox.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200'); }
             alertBox.innerText = message;
         }
 
-        function hideAuthAlert() {
-            document.getElementById('auth-alert').classList.add('hidden');
-        }
+        function hideAuthAlert() { document.getElementById('auth-alert').classList.add('hidden'); }
 
-        // --- DATA PERSISTENCE & SUPABASE DATA STORAGE ---
+        // --- DATA PERSISTENCE ---
         async function saveData() {
             localStorage.setItem('attendanceTrackerBackup', JSON.stringify(appData));
             if (supabaseClient && currentUser) {
                 try {
-                    const { error } = await supabaseClient
-                        .from('user_data')
-                        .upsert({
-                            user_id: currentUser.id,
-                            app_data: appData,
-                            updated_at: new Date().toISOString()
-                        }, { onConflict: 'user_id' });
+                    const { error } = await supabaseClient.from('user_data').upsert({
+                        user_id: currentUser.id, app_data: appData, updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id' });
                     if (error) console.error("Cloud save error:", error.message);
-                } catch (error) {
-                    console.error("Error saving data to cloud:", error);
-                }
+                } catch (error) { console.error("Error saving data to cloud:", error); }
             }
         }
 
         async function loadDataFromCloud() {
             if (supabaseClient && currentUser) {
                 try {
-                    const { data, error } = await supabaseClient
-                        .from('user_data')
-                        .select('app_data')
-                        .eq('user_id', currentUser.id)
-                        .maybeSingle();
-
-                    if (data && data.app_data) {
-                        appData = data.app_data;
-                    }
-                } catch (error) {
-                    console.error("Cloud data fetch failed:", error);
-                }
+                    const { data, error } = await supabaseClient.from('user_data').select('app_data').eq('user_id', currentUser.id).maybeSingle();
+                    if (data && data.app_data) appData = data.app_data;
+                } catch (error) { console.error("Cloud data fetch failed:", error); }
             } else {
                 const localBackup = JSON.parse(localStorage.getItem('attendanceTrackerBackup'));
                 if (localBackup) appData = localBackup;
             }
 
-            // Fallback for new properties
             if (appData.studentName === undefined) appData.studentName = "";
             if (appData.studentSection === undefined) appData.studentSection = appData.batchName || "";
             if (appData.studentSemester === undefined) appData.studentSemester = "";
@@ -776,21 +676,26 @@
         function getUniqueSubjects() {
             let subjects = new Set();
             ORDERED_DAYS.forEach(day => {
-                appData.schedule[day].slots.forEach(s => {
-                    if (s.trim() !== "") subjects.add(s.trim());
-                });
+                appData.schedule[day].slots.forEach(s => { if (s.trim() !== "") subjects.add(s.trim()); });
             });
             return Array.from(subjects).sort();
         }
 
         function updateStudentInfo(field, val) {
-            if (field === 'name') {
-                appData.studentName = val;
-                renderGreeting();
-            }
+            if (field === 'name') appData.studentName = val;
             if (field === 'section') appData.studentSection = val;
             if (field === 'semester') appData.studentSemester = val;
+            updateGreeting();
             saveData();
+        }
+
+        function updateGreeting() {
+            const greetingEl = document.getElementById('greeting-title');
+            if(appData.studentName && appData.studentName.trim() !== "") {
+                greetingEl.innerText = `Hello ${appData.studentName} :)`;
+            } else {
+                greetingEl.innerText = 'Hello :)';
+            }
         }
 
         function updateCriteria(val) {
@@ -802,7 +707,6 @@
         function changeDate(days) {
             let newDate = new Date(currentDate);
             newDate.setDate(newDate.getDate() + days);
-
             if (newDate >= START_DATE) {
                 currentDate = newDate;
                 const dailyList = document.getElementById('daily-classes-list');
@@ -831,9 +735,7 @@
                 let replacedSlots = new Set();
                 if (dayRecord.extra) {
                     dayRecord.extra.forEach(ext => {
-                        if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) {
-                            replacedSlots.add(ext.replacedSlot);
-                        }
+                        if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) replacedSlots.add(ext.replacedSlot);
                     });
                 }
 
@@ -843,38 +745,23 @@
                     if (subject !== "") {
                         let span = 1;
                         while (i + span < SLOTS && dailyTemplate[i + span].trim() === subject) span++;
-
                         if (!replacedSlots.has(i)) {
                             if (!stats[subject]) stats[subject] = { attended: 0, missed: 0, gt: 0, held: 0 };
                             const status = dayRecord.slots[i];
-                            if (status === 'attended') {
-                                stats[subject].attended++;
-                                stats[subject].held++;
-                            } else if (status === 'missed') {
-                                stats[subject].missed++;
-                                stats[subject].held++;
-                            } else if (status === 'gt') {
-                                stats[subject].gt++;
-                            }
+                            if (status === 'attended') { stats[subject].attended++; stats[subject].held++; } 
+                            else if (status === 'missed') { stats[subject].missed++; stats[subject].held++; } 
+                            else if (status === 'gt') { stats[subject].gt++; }
                         }
                         i += span;
-                    } else {
-                        i++;
-                    }
+                    } else { i++; }
                 }
 
                 if (dayRecord.extra) {
                     dayRecord.extra.forEach(ext => {
                         if (!stats[ext.subject]) stats[ext.subject] = { attended: 0, missed: 0, gt: 0, held: 0 };
-                        if (ext.status === 'attended') {
-                            stats[ext.subject].attended++;
-                            stats[ext.subject].held++;
-                        } else if (ext.status === 'missed') {
-                            stats[ext.subject].missed++;
-                            stats[ext.subject].held++;
-                        } else if (ext.status === 'gt') {
-                            stats[ext.subject].gt++;
-                        }
+                        if (ext.status === 'attended') { stats[ext.subject].attended++; stats[ext.subject].held++; } 
+                        else if (ext.status === 'missed') { stats[ext.subject].missed++; stats[ext.subject].held++; } 
+                        else if (ext.status === 'gt') { stats[ext.subject].gt++; }
                     });
                 }
             }
@@ -893,9 +780,7 @@
                 let replacedSlots = new Set();
                 if (dayRecord.extra) {
                     dayRecord.extra.forEach(ext => {
-                        if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) {
-                            replacedSlots.add(ext.replacedSlot);
-                        }
+                        if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) replacedSlots.add(ext.replacedSlot);
                     });
                 }
 
@@ -905,23 +790,16 @@
                     if (subject !== "") {
                         let span = 1;
                         while (i + span < SLOTS && dailyTemplate[i + span].trim() === subject) span++;
-
                         if (!replacedSlots.has(i)) {
                             if (dayRecord.slots[i] === 'missed' || dayRecord.slots[i] === 'gt') {
                                 const listToPush = dayRecord.slots[i] === 'gt' ? missedList.gt : missedList.personal;
                                 listToPush.push({
-                                    dateObj: recordDate,
-                                    dateString: dateStr,
-                                    subject: subject,
-                                    time: getMergedTime(i, i + span - 1),
-                                    type: 'regular'
+                                    dateObj: recordDate, dateString: dateStr, subject: subject, time: getMergedTime(i, i + span - 1), type: 'regular'
                                 });
                             }
                         }
                         i += span;
-                    } else {
-                        i++;
-                    }
+                    } else { i++; }
                 }
 
                 if (dayRecord.extra) {
@@ -929,11 +807,7 @@
                         if (ext.status === 'missed' || ext.status === 'gt') {
                             const listToPush = ext.status === 'gt' ? missedList.gt : missedList.personal;
                             listToPush.push({
-                                dateObj: recordDate,
-                                dateString: dateStr,
-                                subject: ext.subject,
-                                time: ext.time,
-                                type: 'extra'
+                                dateObj: recordDate, dateString: dateStr, subject: ext.subject, time: ext.time, type: 'extra'
                             });
                         }
                     });
@@ -951,59 +825,32 @@
             showToast("Reason saved", "success");
         }
 
-        // --- TAB SWITCHING & MENU NAVIGATION ---
-        function toggleMenu() {
-            const menu = document.getElementById('side-menu');
-            const overlay = document.getElementById('side-menu-overlay');
-            menu.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
+        // --- TAB SWITCHING (Sidebar Layout) ---
         function switchTab(tabName) {
-            const sections = ['dashboard', 'subjects', 'missed', 'timetable', 'profile'];
+            const tabs = ['dashboard', 'subjects', 'missed', 'timetable', 'profile'];
             
-            sections.forEach(section => {
-                const el = document.getElementById(`section-${section}`);
-                if(el) {
-                    el.classList.toggle('hidden', tabName !== section);
-                    el.classList.toggle('block', tabName === section);
+            tabs.forEach(tab => {
+                document.getElementById(`section-${tab}`).classList.toggle('hidden', tab !== tabName);
+                document.getElementById(`section-${tab}`).classList.toggle('block', tab === tabName);
+                
+                const btn = document.getElementById(`tab-${tab}`);
+                if(btn) {
+                    if(tab === tabName) {
+                        btn.className = "flex items-center w-full px-4 py-3 bg-blue-50 text-blue-700 font-bold rounded-xl transition-colors";
+                    } else {
+                        btn.className = "flex items-center w-full px-4 py-3 text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900 rounded-xl transition-colors";
+                    }
                 }
             });
-
-            const activeClass = "w-full text-left px-4 py-3.5 bg-blue-50 text-blue-700 font-bold rounded-xl shadow-sm transition-all duration-300 flex items-center gap-3";
-            const inactiveClass = "w-full text-left px-4 py-3.5 text-slate-500 font-semibold hover:bg-slate-50 hover:text-slate-700 rounded-xl transition-all duration-300 flex items-center gap-3";
-
-            sections.forEach(section => {
-                const tab = document.getElementById(`tab-${section}`);
-                if (tab) {
-                    tab.className = tabName === section ? activeClass : inactiveClass;
-                }
-            });
-            
-            // Auto close the sidebar if it's currently open
-            const menu = document.getElementById('side-menu');
-            if(!menu.classList.contains('-translate-x-full')){
-                toggleMenu();
-            }
         }
 
         // --- RENDERING FUNCTIONS ---
-        function renderGreeting() {
-            const name = appData.studentName ? appData.studentName.trim() : "";
-            const greetingEl = document.getElementById('greeting-text');
-            if (name) {
-                greetingEl.innerText = `Hello ${name.split(' ')[0]} :)`;
-            } else {
-                greetingEl.innerText = `Hello :)`;
-            }
-        }
-
         function renderAll() {
-            document.getElementById('profile-student-name').value = appData.studentName || "";
-            document.getElementById('profile-student-section').value = appData.studentSection || "";
-            document.getElementById('profile-student-semester').value = appData.studentSemester || "";
+            document.getElementById('student-name').value = appData.studentName || "";
+            document.getElementById('student-section').value = appData.studentSection || "";
+            document.getElementById('student-semester').value = appData.studentSemester || "";
+            updateGreeting();
             
-            renderGreeting();
             const stats = calculateStats();
             renderDateUI();
             renderDailyClasses();
@@ -1031,7 +878,6 @@
             const actionBtns = document.getElementById('day-action-buttons');
 
             listDiv.innerHTML = '';
-
             let dateRecord = appData.records[dateStr];
             let isSpecialHoliday = dateRecord ? dateRecord.isHoliday : false;
             let isWeeklyHoliday = template.holiday;
@@ -1054,17 +900,17 @@
                     `;
                 } else {
                     actionBtns.innerHTML = `
-                        <button onclick="markWorkingDay()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition shadow-sm active:scale-95" title="Mark all classes today as attended">
+                        <button onclick="markWorkingDay()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition shadow-sm active:scale-95">
                             <i class="fas fa-briefcase mr-1.5"></i> Active Day
                         </button>
-                        <button onclick="toggleDateHoliday()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition shadow-sm active:scale-95" title="Mark today as a holiday">
+                        <button onclick="toggleDateHoliday()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition shadow-sm active:scale-95">
                             <i class="fas fa-umbrella-beach mr-1.5"></i> Holiday
                         </button>
                         <button onclick="openExtraClassModal()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition shadow-sm active:scale-95">
                             <i class="fas fa-plus mr-1.5"></i> Extra
                         </button>
                         ${dateRecord && ((Object.keys(dateRecord.slots).length > 0) || (dateRecord.extra && dateRecord.extra.length > 0)) ? `
-                        <button onclick="clearDay()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition shadow-sm active:scale-95" title="Clear all records for this day">
+                        <button onclick="clearDay()" class="flex-1 sm:flex-none justify-center flex items-center text-sm font-bold py-2 px-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition shadow-sm active:scale-95">
                             <i class="fas fa-eraser mr-1.5"></i> Clear
                         </button>` : ''}
                     `;
@@ -1087,12 +933,9 @@
 
             let hasClasses = false;
             let replacedSlots = new Set();
-
             if (dateRecord && dateRecord.extra) {
                 dateRecord.extra.forEach(ext => {
-                    if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) {
-                        replacedSlots.add(ext.replacedSlot);
-                    }
+                    if (ext.replacedSlot !== null && ext.replacedSlot !== undefined) replacedSlots.add(ext.replacedSlot);
                 });
             }
 
@@ -1101,20 +944,14 @@
                 if (subjectName !== "") {
                     let mergedIndices = [i];
                     let j = i + 1;
-                    while (j < SLOTS && template.slots[j].trim() === subjectName) {
-                        mergedIndices.push(j);
-                        j++;
-                    }
+                    while (j < SLOTS && template.slots[j].trim() === subjectName) { mergedIndices.push(j); j++; }
 
                     if (!replacedSlots.has(i)) {
                         hasClasses = true;
                         const timeSlot = getMergedTime(mergedIndices[0], mergedIndices[mergedIndices.length - 1]);
                         let selectedStatus = null;
-                        if (dateRecord && dateRecord.slots[mergedIndices[0]]) {
-                            selectedStatus = dateRecord.slots[mergedIndices[0]];
-                        }
+                        if (dateRecord && dateRecord.slots[mergedIndices[0]]) selectedStatus = dateRecord.slots[mergedIndices[0]];
 
-                        // Updated segmented control UI strings including GT
                         const baseBtn = "flex-1 md:w-auto py-2.5 px-3 rounded-lg text-sm font-bold transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 border border-transparent";
                         const btnAtt = selectedStatus === 'attended' ? `${baseBtn} btn-selected-attended` : `${baseBtn} text-slate-500 hover:bg-emerald-50 hover:text-emerald-600`;
                         const btnMis = selectedStatus === 'missed' ? `${baseBtn} btn-selected-missed` : `${baseBtn} text-slate-500 hover:bg-rose-50 hover:text-rose-600`;
@@ -1128,30 +965,18 @@
                         listDiv.innerHTML += `
                             <div class="group flex flex-col xl:flex-row xl:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300 ${accentColor}"></div>
-                                
                                 <div class="flex flex-col flex-1 pl-2">
                                     <span class="font-extrabold text-slate-800 text-base md:text-lg tracking-tight">${subjectName} ${badgeHTML}</span>
                                     <div class="flex items-center gap-2 mt-1.5">
-                                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                                            <i class="far fa-clock text-xs"></i>
-                                        </div>
+                                        <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400"><i class="far fa-clock text-xs"></i></div>
                                         <span class="text-sm font-semibold text-slate-500">${timeSlot}</span>
                                     </div>
                                 </div>
-
                                 <div class="grid grid-cols-2 lg:flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full xl:w-auto gap-1">
-                                    <button onclick="markClass(${arrayStr}, 'attended')" class="${btnAtt}">
-                                        <i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span>
-                                    </button>
-                                    <button onclick="markClass(${arrayStr}, 'missed')" class="${btnMis}">
-                                        <i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span>
-                                    </button>
-                                    <button onclick="markClass(${arrayStr}, 'gt')" class="${btnGt}">
-                                        <i class="fas fa-users-slash"></i> <span>GT</span>
-                                    </button>
-                                    <button onclick="markClass(${arrayStr}, 'cancelled')" class="${btnCan}">
-                                        <i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span>
-                                    </button>
+                                    <button onclick="markClass(${arrayStr}, 'attended')" class="${btnAtt}"><i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span></button>
+                                    <button onclick="markClass(${arrayStr}, 'missed')" class="${btnMis}"><i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span></button>
+                                    <button onclick="markClass(${arrayStr}, 'gt')" class="${btnGt}"><i class="fas fa-users-slash"></i> <span>GT</span></button>
+                                    <button onclick="markClass(${arrayStr}, 'cancelled')" class="${btnCan}"><i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span></button>
                                 </div>
                             </div>
                         `;
@@ -1184,86 +1009,60 @@
                 const accentColor = ext.status === 'attended' ? 'bg-emerald-500' : ext.status === 'missed' ? 'bg-rose-500' : ext.status === 'gt' ? 'bg-purple-500' : ext.status === 'cancelled' ? 'bg-slate-500' : 'bg-indigo-500';
                 
                 let badgeHTML = '<span class="text-[10px] font-black text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md ml-2 align-middle border border-indigo-200 tracking-wide uppercase">Extra Class</span>';
-                if (ext.replacedSlot !== null) {
-                    badgeHTML = '<span class="text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md ml-2 align-middle border border-amber-200 tracking-wide uppercase">Exchanged</span>';
-                }
+                if (ext.replacedSlot !== null) badgeHTML = '<span class="text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md ml-2 align-middle border border-amber-200 tracking-wide uppercase">Exchanged</span>';
 
                 listDiv.innerHTML += `
                     <div class="group flex flex-col xl:flex-row xl:items-center bg-white p-5 rounded-2xl border border-slate-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-all duration-300 gap-4 relative overflow-hidden">
                         <div class="absolute left-0 top-0 bottom-0 w-1.5 transition-colors duration-300 ${accentColor}"></div>
-                        
                         <div class="flex flex-col flex-1 pl-2">
                             <div class="flex justify-between items-start">
                                 <span class="font-extrabold text-slate-800 text-base md:text-lg tracking-tight">${ext.subject} ${badgeHTML}</span>
-                                <button onclick="deleteExtraClass(${ext.id})" class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-xl transition-colors" title="Delete extra class"><i class="fas fa-trash"></i></button>
+                                <button onclick="deleteExtraClass(${ext.id})" class="text-slate-300 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-xl transition-colors"><i class="fas fa-trash"></i></button>
                             </div>
                             <div class="flex items-center gap-2 mt-1.5">
-                                <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400">
-                                    <i class="far fa-clock text-xs"></i>
-                                </div>
+                                <div class="flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-400"><i class="far fa-clock text-xs"></i></div>
                                 <span class="text-sm font-semibold text-slate-500">${ext.time}</span>
                             </div>
                         </div>
-
                         <div class="grid grid-cols-2 lg:flex bg-slate-100/70 p-1.5 rounded-xl border border-slate-100 w-full xl:w-auto gap-1">
-                            <button onclick="markExtraClass(${ext.id}, 'attended')" class="${btnAtt}">
-                                <i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span>
-                            </button>
-                            <button onclick="markExtraClass(${ext.id}, 'missed')" class="${btnMis}">
-                                <i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span>
-                            </button>
-                            <button onclick="markExtraClass(${ext.id}, 'gt')" class="${btnGt}">
-                                <i class="fas fa-users-slash"></i> <span>GT</span>
-                            </button>
-                            <button onclick="markExtraClass(${ext.id}, 'cancelled')" class="${btnCan}">
-                                <i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span>
-                            </button>
+                            <button onclick="markExtraClass(${ext.id}, 'attended')" class="${btnAtt}"><i class="fas fa-check"></i> <span class="hidden sm:inline">Attended</span></button>
+                            <button onclick="markExtraClass(${ext.id}, 'missed')" class="${btnMis}"><i class="fas fa-times"></i> <span class="hidden sm:inline">Missed</span></button>
+                            <button onclick="markExtraClass(${ext.id}, 'gt')" class="${btnGt}"><i class="fas fa-users-slash"></i> <span>GT</span></button>
+                            <button onclick="markExtraClass(${ext.id}, 'cancelled')" class="${btnCan}"><i class="fas fa-minus"></i> <span class="hidden sm:inline">Cancelled</span></button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        // Handle Classes vs Labs Toggle in Subject Overview
         function switchSubjectCategory(cat) {
             activeSubjectCategory = cat;
             const btnClasses = document.getElementById('cat-classes');
             const btnLabs = document.getElementById('cat-labs');
-            
             const activeClass = "px-8 py-2 bg-white text-indigo-700 font-bold rounded-lg shadow-sm transition-all duration-300";
             const inactiveClass = "px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300";
 
-            if(cat === 'classes') {
-                btnClasses.className = activeClass;
-                btnLabs.className = inactiveClass;
-            } else {
-                btnLabs.className = activeClass;
-                btnClasses.className = inactiveClass;
-            }
-            
+            if(cat === 'classes') { btnClasses.className = activeClass; btnLabs.className = inactiveClass; } 
+            else { btnLabs.className = activeClass; btnClasses.className = inactiveClass; }
             renderSubjectStats(calculateStats());
         }
 
-        // Handle GT vs Personal Toggle in Missed Classes
         function switchMissedCategory(cat) {
             activeMissedCategory = cat;
             const btnGt = document.getElementById('cat-missed-gt');
             const btnPersonal = document.getElementById('cat-missed-personal');
-
             const activeClassGt = "px-8 py-2 bg-white text-purple-700 font-bold rounded-lg shadow-sm transition-all duration-300";
             const activeClassPersonal = "px-8 py-2 bg-white text-rose-600 font-bold rounded-lg shadow-sm transition-all duration-300";
             const inactiveClass = "px-8 py-2 text-slate-500 font-medium hover:text-slate-700 rounded-lg transition-all duration-300";
 
             if(cat === 'gt') {
-                btnGt.className = activeClassGt;
-                btnPersonal.className = inactiveClass;
+                btnGt.className = activeClassGt; btnPersonal.className = inactiveClass;
                 document.getElementById('wrapper-missed-gt').classList.remove('hidden');
                 document.getElementById('wrapper-missed-gt').classList.add('block');
                 document.getElementById('wrapper-missed-personal').classList.add('hidden');
                 document.getElementById('wrapper-missed-personal').classList.remove('block');
             } else {
-                btnPersonal.className = activeClassPersonal;
-                btnGt.className = inactiveClass;
+                btnPersonal.className = activeClassPersonal; btnGt.className = inactiveClass;
                 document.getElementById('wrapper-missed-personal').classList.remove('hidden');
                 document.getElementById('wrapper-missed-personal').classList.add('block');
                 document.getElementById('wrapper-missed-gt').classList.add('hidden');
@@ -1274,43 +1073,30 @@
         function renderSubjectStats(stats) {
             const listDiv = document.getElementById('subject-list');
             listDiv.innerHTML = '';
-
             const target = appData.targetCriteria ? (appData.targetCriteria / 100) : 0.75;
-            
-            // Filter by Classes / Labs
-            const subjects = Object.entries(stats)
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .filter(([name]) => {
-                    const isLab = name.toLowerCase().includes('lab');
-                    return activeSubjectCategory === 'labs' ? isLab : !isLab;
-                });
+            const subjects = Object.entries(stats).sort((a, b) => a[0].localeCompare(b[0])).filter(([name]) => {
+                const isLab = name.toLowerCase().includes('lab');
+                return activeSubjectCategory === 'labs' ? isLab : !isLab;
+            });
 
             if (subjects.length === 0) {
-                listDiv.innerHTML = `
-                    <div class="col-span-1 lg:col-span-2 flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
-                        <i class="fas fa-folder-open text-3xl mb-3"></i>
-                        <p class="text-sm font-medium">No ${activeSubjectCategory} found in timetable.</p>
-                    </div>`;
+                listDiv.innerHTML = `<div class="col-span-1 lg:col-span-2 flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed"><i class="fas fa-folder-open text-3xl mb-3"></i><p class="text-sm font-medium">No ${activeSubjectCategory} found in timetable.</p></div>`;
                 return;
             }
 
             subjects.forEach(([name, data]) => {
-                // Calculation: GT as Absent
                 const pctAbsent = calcPercent(data.attended, data.held + data.gt);
                 const colorClassAbsent = getColorClass(pctAbsent, target);
                 const bgClassAbsent = getBgColorClass(pctAbsent, target);
                 
-                // Calculation: GT as Cancelled
                 const pctCancelled = calcPercent(data.attended, data.held);
                 const colorClassCancelled = getColorClass(pctCancelled, target);
                 const bgClassCancelled = getBgColorClass(pctCancelled, target);
 
                 let statusBadge = '';
-                // Use the stricter 'Absent' metric for safe/miss recommendations
                 let strictHeld = data.held + data.gt;
                 if (strictHeld > 0) {
                     let safeToMiss = Math.floor(data.attended / target) - strictHeld;
-
                     if (safeToMiss > 0) {
                         statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"><i class="fas fa-check-circle"></i> Safe to miss: ${safeToMiss}</span>`;
                     } else if (safeToMiss === 0 && (data.attended / strictHeld) >= target) {
@@ -1319,25 +1105,16 @@
                         let needToAttend = Math.ceil((target * strictHeld - data.attended) / (1 - target));
                         statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm"><i class="fas fa-arrow-trend-up"></i> Need to attend: ${needToAttend}</span>`;
                     }
-                } else {
-                    statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">No classes yet</span>`;
-                }
+                } else { statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 shadow-sm">No classes yet</span>`; }
 
                 listDiv.innerHTML += `
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden transition-shadow hover:shadow-md">
-                        <!-- Top Details Section -->
                         <div class="p-5 pb-4">
                             <h3 class="font-extrabold text-slate-800 text-lg mb-1 break-words" title="${name}">${name}</h3>
                             <p class="text-xs text-slate-500 font-medium">Attended: <span class="text-slate-700">${data.attended}</span> &nbsp;|&nbsp; Missed: <span class="text-slate-700">${data.missed}</span> &nbsp;|&nbsp; GT: <span class="text-slate-700">${data.gt}</span></p>
-                            <div class="mt-3">
-                                ${statusBadge}
-                            </div>
+                            <div class="mt-3">${statusBadge}</div>
                         </div>
-                        
-                        <!-- Bottom Split Section -->
                         <div class="flex flex-row border-t border-slate-100 bg-slate-50/50 p-4 pt-3.5">
-                            
-                            <!-- GT as Absent -->
                             <div class="flex-1 flex flex-col pr-4 border-r border-slate-200">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
                                     <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wide">GT as Absent</span>
@@ -1347,8 +1124,6 @@
                                     <div class="${bgClassAbsent} h-2 rounded-full transition-all duration-500" style="width: ${pctAbsent}%"></div>
                                 </div>
                             </div>
-                            
-                            <!-- GT as Cancelled -->
                             <div class="flex-1 flex flex-col pl-4">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
                                     <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wide">GT as Cancelled</span>
@@ -1358,7 +1133,6 @@
                                     <div class="${bgClassCancelled} h-2 rounded-full transition-all duration-500" style="width: ${pctCancelled}%"></div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 `;
@@ -1370,56 +1144,30 @@
             const tbody = document.getElementById('timetable-body');
             let headerHTML = `<th class="p-4 font-bold text-slate-600 w-28 border-r border-slate-200 bg-slate-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">Day</th>`;
             for (let i = 0; i < SLOTS; i++) {
-                headerHTML += `
-                    <th class="p-3 font-semibold text-center border-r border-slate-200 min-w-[120px]">
-                        <div class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1.5">Period ${i + 1}</div>
-                        <input type="text" id="time-slot-${i}" value="${appData.slotTimings[i]}" class="w-full text-center text-xs font-medium text-slate-700 bg-white rounded-md p-1.5 border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
-                    </th>
-                `;
+                headerHTML += `<th class="p-3 font-semibold text-center border-r border-slate-200 min-w-[120px]"><div class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1.5">Period ${i + 1}</div><input type="text" id="time-slot-${i}" value="${appData.slotTimings[i]}" class="w-full text-center text-xs font-medium text-slate-700 bg-white rounded-md p-1.5 border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none transition-shadow"></th>`;
             }
             thead.innerHTML = headerHTML;
             tbody.innerHTML = '';
             ORDERED_DAYS.forEach(day => {
                 const dayData = appData.schedule[day];
-                let rowHTML = `
-                    <tr class="border-b border-slate-200 bg-white hover:bg-slate-50 transition-colors">
-                        <td class="p-3 border-r border-slate-200 bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-                            <div class="font-extrabold text-slate-800">${day}</div>
-                            <label class="flex items-center space-x-2 mt-1.5 cursor-pointer select-none group w-max">
-                                <input type="checkbox" id="holiday-${day}" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 transition-colors cursor-pointer" ${dayData.holiday ? 'checked' : ''} onchange="toggleRowDisabled('${day}')">
-                                <span class="text-xs font-semibold text-slate-500 group-hover:text-slate-700 transition-colors">Day Off</span>
-                            </label>
-                        </td>
-                `;
+                let rowHTML = `<tr class="border-b border-slate-200 bg-white hover:bg-slate-50 transition-colors"><td class="p-3 border-r border-slate-200 bg-white sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"><div class="font-extrabold text-slate-800">${day}</div><label class="flex items-center space-x-2 mt-1.5 cursor-pointer select-none group w-max"><input type="checkbox" id="holiday-${day}" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 transition-colors cursor-pointer" ${dayData.holiday ? 'checked' : ''} onchange="toggleRowDisabled('${day}')"><span class="text-xs font-semibold text-slate-500 group-hover:text-slate-700 transition-colors">Day Off</span></label></td>`;
                 for (let i = 0; i < SLOTS; i++) {
                     const subj = dayData.slots[i];
                     const isDisabled = dayData.holiday ? 'disabled' : '';
                     const opacityClass = dayData.holiday ? 'opacity-50 bg-slate-50' : '';
-                    rowHTML += `
-                        <td class="p-2 border-r border-slate-200 align-top ${opacityClass} transition-opacity duration-300" id="td-${day}-${i}">
-                            <textarea rows="3" id="name-${day}-${i}" placeholder="Subject name..." class="w-full h-auto min-h-[4rem] resize-y text-xs text-slate-700 font-medium bg-transparent rounded-md p-1.5 border border-transparent hover:border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all placeholder:text-slate-400" ${isDisabled}>${subj}</textarea>
-                        </td>
-                    `;
+                    rowHTML += `<td class="p-2 border-r border-slate-200 align-top ${opacityClass} transition-opacity duration-300" id="td-${day}-${i}"><textarea rows="3" id="name-${day}-${i}" placeholder="Subject name..." class="w-full h-auto min-h-[4rem] resize-y text-xs text-slate-700 font-medium bg-transparent rounded-md p-1.5 border border-transparent hover:border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 outline-none transition-all placeholder:text-slate-400" ${isDisabled}>${subj}</textarea></td>`;
                 }
                 rowHTML += `</tr>`;
                 tbody.innerHTML += rowHTML;
             });
         }
 
-        // Sub-function to build the UI for the individual missed lists
         function renderMissedListCategory(listArray, containerId, emptyIcon, emptyColor, emptyMessage, borderColor, timeIconColor) {
             const container = document.getElementById(containerId);
             if (!container) return; 
 
             if (listArray.length === 0) {
-                container.innerHTML = `
-                    <div class="flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed w-full">
-                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm border border-slate-100">
-                            <i class="${emptyIcon} text-xl ${emptyColor}"></i>
-                        </div>
-                        <p class="text-sm font-medium">${emptyMessage}</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="flex flex-col justify-center items-center py-12 text-slate-400 bg-slate-50 rounded-2xl border border-slate-200 border-dashed w-full"><div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm border border-slate-100"><i class="${emptyIcon} text-xl ${emptyColor}"></i></div><p class="text-sm font-medium">${emptyMessage}</p></div>`;
                 return;
             }
 
@@ -1429,76 +1177,26 @@
 
             listArray.forEach(item => {
                 const dateFormatted = item.dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-                
                 if (currentDateStr !== item.dateString) {
-                    if (groupHtml !== "") {
-                        html += groupHtml + '</div></div>';
-                    }
+                    if (groupHtml !== "") html += groupHtml + '</div></div>';
                     currentDateStr = item.dateString;
-                    
-                    const dailyReason = (appData.records[item.dateString] && appData.records[item.dateString].dayReason) 
-                        ? appData.records[item.dateString].dayReason 
-                        : "";
-
-                    groupHtml = `
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm w-full">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-3 border-b border-slate-200 gap-3">
-                                <h4 class="text-sm font-bold text-slate-700 whitespace-nowrap">
-                                    <i class="far fa-calendar-alt text-slate-400 mr-2"></i>${dateFormatted}
-                                </h4>
-                                <div class="w-full md:w-1/2 lg:w-2/3">
-                                     <input type="text" placeholder="Reason for missed classes..." value="${dailyReason.replace(/"/g, '&quot;')}" 
-                                        onchange="saveDailyMissedReason('${item.dateString}', this.value)"
-                                        class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 outline-none transition-all placeholder:text-slate-400">
-                                </div>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                    `;
+                    const dailyReason = (appData.records[item.dateString] && appData.records[item.dateString].dayReason) ? appData.records[item.dateString].dayReason : "";
+                    groupHtml = `<div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm w-full"><div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 pb-3 border-b border-slate-200 gap-3"><h4 class="text-sm font-bold text-slate-700 whitespace-nowrap"><i class="far fa-calendar-alt text-slate-400 mr-2"></i>${dateFormatted}</h4><div class="w-full md:w-1/2 lg:w-2/3"><input type="text" placeholder="Reason for missed classes..." value="${dailyReason.replace(/"/g, '&quot;')}" onchange="saveDailyMissedReason('${item.dateString}', this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-200 outline-none transition-all placeholder:text-slate-400"></div></div><div class="flex flex-col gap-2">`;
                 }
 
                 const badge = item.type === 'extra' ? '<span class="text-[10px] ml-2 font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full border border-indigo-200 inline-block align-middle">Extra Class</span>' : '';
-                
-                groupHtml += `
-                    <div class="bg-white p-3.5 rounded-lg border border-slate-200 border-l-4 ${borderColor} flex flex-col gap-1 w-full shadow-sm hover:shadow transition-shadow">
-                        <span class="font-bold text-slate-800 text-sm md:text-base leading-tight">${item.subject} ${badge}</span>
-                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-                            <i class="far fa-clock ${timeIconColor}"></i> 
-                            <span>${item.time}</span>
-                        </div>
-                    </div>
-                `;
+                groupHtml += `<div class="bg-white p-3.5 rounded-lg border border-slate-200 border-l-4 ${borderColor} flex flex-col gap-1 w-full shadow-sm hover:shadow transition-shadow"><span class="font-bold text-slate-800 text-sm md:text-base leading-tight">${item.subject} ${badge}</span><div class="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1"><i class="far fa-clock ${timeIconColor}"></i> <span>${item.time}</span></div></div>`;
             });
             
-            if (groupHtml !== "") {
-                html += groupHtml + '</div></div>';
-            }
-            
+            if (groupHtml !== "") html += groupHtml + '</div></div>';
             html += '</div>';
             container.innerHTML = html;
         }
 
         function renderMissedClasses() {
             const missedList = getMissedClasses();
-            
-            renderMissedListCategory(
-                missedList.personal, 
-                'missed-classes-list-personal', 
-                'fas fa-check-circle', 
-                'text-emerald-500', 
-                'No personally missed classes! Good job.',
-                'border-l-rose-500',
-                'text-rose-400'
-            );
-
-            renderMissedListCategory(
-                missedList.gt, 
-                'missed-classes-list-gt', 
-                'fas fa-users', 
-                'text-slate-300', 
-                'No mass bunks recorded.',
-                'border-l-purple-500',
-                'text-purple-400'
-            );
+            renderMissedListCategory(missedList.personal, 'missed-classes-list-personal', 'fas fa-check-circle', 'text-emerald-500', 'No personally missed classes! Good job.', 'border-l-rose-500', 'text-rose-400');
+            renderMissedListCategory(missedList.gt, 'missed-classes-list-gt', 'fas fa-users', 'text-slate-300', 'No mass bunks recorded.', 'border-l-purple-500', 'text-purple-400');
         }
 
         // --- ACTIONS ---
@@ -1510,41 +1208,28 @@
             else appData.records[dateStr].isHoliday = false;
 
             for (let i = 0; i < SLOTS; i++) {
-                if (template.slots[i].trim() !== "") {
-                    appData.records[dateStr].slots[i] = 'attended';
-                }
+                if (template.slots[i].trim() !== "") appData.records[dateStr].slots[i] = 'attended';
             }
-            saveData();
-            renderAll();
-            showToast("Marked all classes as attended", "success");
+            saveData(); renderAll(); showToast("Marked all classes as attended", "success");
         }
 
         function clearDay() {
             const dateStr = formatDate(currentDate);
-            if (appData.records[dateStr]) {
-                delete appData.records[dateStr];
-                saveData();
-                renderAll();
-                showToast("Cleared daily logs", "info");
-            }
+            if (appData.records[dateStr]) { delete appData.records[dateStr]; saveData(); renderAll(); showToast("Cleared daily logs", "info"); }
         }
 
         function toggleDateHoliday() {
             const dateStr = formatDate(currentDate);
             if (!appData.records[dateStr]) appData.records[dateStr] = { isHoliday: true, slots: {} };
             else appData.records[dateStr].isHoliday = !appData.records[dateStr].isHoliday;
-            saveData();
-            renderAll();
+            saveData(); renderAll();
         }
 
         function markClass(indicesArray, status) {
             const dateStr = formatDate(currentDate);
             if (!appData.records[dateStr]) appData.records[dateStr] = { isHoliday: false, slots: {} };
-            indicesArray.forEach(idx => {
-                appData.records[dateStr].slots[idx] = status;
-            });
-            saveData();
-            renderAll();
+            indicesArray.forEach(idx => { appData.records[dateStr].slots[idx] = status; });
+            saveData(); renderAll();
         }
 
         function toggleRowDisabled(day) {
@@ -1553,40 +1238,26 @@
                 const textarea = document.getElementById(`name-${day}-${i}`);
                 const td = document.getElementById(`td-${day}-${i}`);
                 textarea.disabled = isHoliday;
-                if (isHoliday) {
-                    td.classList.add('opacity-50', 'bg-slate-50');
-                    textarea.classList.remove('hover:border-slate-300');
-                } else {
-                    td.classList.remove('opacity-50', 'bg-slate-50');
-                    textarea.classList.add('hover:border-slate-300');
-                }
+                if (isHoliday) { td.classList.add('opacity-50', 'bg-slate-50'); textarea.classList.remove('hover:border-slate-300'); } 
+                else { td.classList.remove('opacity-50', 'bg-slate-50'); textarea.classList.add('hover:border-slate-300'); }
             }
         }
 
         function saveTimetable() {
-            for (let i = 0; i < SLOTS; i++) {
-                appData.slotTimings[i] = document.getElementById(`time-slot-${i}`).value;
-            }
+            for (let i = 0; i < SLOTS; i++) { appData.slotTimings[i] = document.getElementById(`time-slot-${i}`).value; }
             ORDERED_DAYS.forEach(day => {
                 const isHoliday = document.getElementById(`holiday-${day}`).checked;
                 appData.schedule[day].holiday = isHoliday;
-                for (let i = 0; i < SLOTS; i++) {
-                    appData.schedule[day].slots[i] = document.getElementById(`name-${day}-${i}`).value.trim();
-                }
+                for (let i = 0; i < SLOTS; i++) { appData.schedule[day].slots[i] = document.getElementById(`name-${day}-${i}`).value.trim(); }
             });
-            saveData();
-            renderAll();
-            switchTab('dashboard');
-            showToast("Timetable saved successfully!", "success");
+            saveData(); renderAll(); switchTab('dashboard'); showToast("Timetable saved successfully!", "success");
         }
 
         // --- EXTRA CLASS LOGIC ---
         function openExtraClassModal() {
             const subjSelect = document.getElementById('extra-subject');
             subjSelect.innerHTML = '';
-            getUniqueSubjects().forEach(subj => {
-                subjSelect.innerHTML += `<option value="${subj}">${subj}</option>`;
-            });
+            getUniqueSubjects().forEach(subj => { subjSelect.innerHTML += `<option value="${subj}">${subj}</option>`; });
 
             document.getElementById('extra-is-exchange').checked = false;
             toggleExchangeDropdown();
@@ -1606,17 +1277,13 @@
                         i += span - 1;
                     }
                 }
-            } else {
-                replaceSelect.innerHTML = '<option value="" disabled>No scheduled classes today to replace</option>';
-            }
+            } else { replaceSelect.innerHTML = '<option value="" disabled>No scheduled classes today to replace</option>'; }
 
             document.getElementById('extra-time').value = '';
             document.getElementById('extra-class-modal').classList.remove('hidden');
         }
 
-        function closeExtraClassModal() {
-            document.getElementById('extra-class-modal').classList.add('hidden');
-        }
+        function closeExtraClassModal() { document.getElementById('extra-class-modal').classList.add('hidden'); }
 
         function toggleExchangeDropdown() {
             const isExchange = document.getElementById('extra-is-exchange').checked;
@@ -1629,38 +1296,24 @@
             const isExchange = document.getElementById('extra-is-exchange').checked;
             const replaceSlot = isExchange ? document.getElementById('extra-replace-slot').value : null;
 
-            if (isExchange && replaceSlot === "") {
-                showToast("Please select a class to replace.", "error");
-                return;
-            }
+            if (isExchange && replaceSlot === "") { showToast("Please select a class to replace.", "error"); return; }
 
             const dateStr = formatDate(currentDate);
             if (!appData.records[dateStr]) appData.records[dateStr] = { isHoliday: false, slots: {} };
             if (!appData.records[dateStr].extra) appData.records[dateStr].extra = [];
 
             appData.records[dateStr].extra.push({
-                id: Date.now(),
-                subject: subject,
-                time: time,
-                replacedSlot: replaceSlot !== null ? parseInt(replaceSlot) : null,
-                status: null
+                id: Date.now(), subject: subject, time: time, replacedSlot: replaceSlot !== null ? parseInt(replaceSlot) : null, status: null
             });
 
-            saveData();
-            renderAll();
-            closeExtraClassModal();
-            showToast("Extra class added", "success");
+            saveData(); renderAll(); closeExtraClassModal(); showToast("Extra class added", "success");
         }
 
         function markExtraClass(id, status) {
             const dateStr = formatDate(currentDate);
             if (appData.records[dateStr] && appData.records[dateStr].extra) {
                 const ext = appData.records[dateStr].extra.find(e => e.id === id);
-                if (ext) {
-                    ext.status = status;
-                    saveData();
-                    renderAll();
-                }
+                if (ext) { ext.status = status; saveData(); renderAll(); }
             }
         }
 
@@ -1670,16 +1323,12 @@
                 const dateStr = formatDate(currentDate);
                 if (appData.records[dateStr] && appData.records[dateStr].extra) {
                     appData.records[dateStr].extra = appData.records[dateStr].extra.filter(e => e.id !== id);
-                    saveData();
-                    renderAll();
-                    showToast("Extra class removed", "info");
+                    saveData(); renderAll(); showToast("Extra class removed", "info");
                 }
             }
         }
 
-        window.onload = function () {
-            initAuthListener();
-        };
+        window.onload = function () { initAuthListener(); };
     </script>
 </body>
 
