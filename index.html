@@ -308,9 +308,41 @@
                     </div>
                 </div>
 
-                <div class="mt-5 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between shadow-inner">
-                    <span class="font-bold text-slate-700 text-sm"><i class="fas fa-briefcase text-blue-500 mr-2"></i>Estimated Working Days:</span>
-                    <span id="working-days-display" class="text-xl font-black text-blue-700">--</span>
+                <!-- Absences View Section (Leaves & GTs) -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-slate-100">
+                    <!-- Personal Leaves -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Personal Leaves</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto" id="personal-leaves-container">
+                            <!-- Personal Leaves injected via JS -->
+                        </div>
+                    </div>
+                    <!-- GT (Mass Bunks) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">GT (Mass Bunks)</label>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto" id="gt-leaves-container">
+                            <!-- GTs injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dual Count Working Days Display -->
+                <div class="mt-5 p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col md:flex-row items-center justify-between shadow-inner gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase text-blue-500 mr-2 text-lg"></i>
+                        <span class="font-bold text-slate-700 text-sm">Estimated Working Days:</span>
+                    </div>
+                    <div class="flex items-center gap-6 bg-white px-4 py-2 rounded-lg border border-blue-100 shadow-sm w-full md:w-auto justify-center">
+                        <div class="flex flex-col items-center">
+                            <span id="working-days-with-gt" class="text-xl font-black text-blue-700 leading-tight">--</span>
+                            <span class="text-[10px] uppercase font-extrabold text-blue-400 tracking-wider">Incl. GTs</span>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <div class="flex flex-col items-center">
+                            <span id="working-days-without-gt" class="text-xl font-black text-purple-700 leading-tight">--</span>
+                            <span class="text-[10px] uppercase font-extrabold text-purple-400 tracking-wider">Excl. GTs</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -811,21 +843,34 @@
         }
 
         function updateWorkingDaysDisplay() {
-            const display = document.getElementById('working-days-display');
+            const displayWithGt = document.getElementById('working-days-with-gt');
+            const displayWithoutGt = document.getElementById('working-days-without-gt');
+            
             if (!appData.semesterStart || !appData.semesterEnd) {
-                display.innerText = "--";
+                displayWithGt.innerText = "--";
+                displayWithoutGt.innerText = "--";
                 return;
             }
 
             const start = new Date(appData.semesterStart);
             const end = new Date(appData.semesterEnd);
             if (start > end) {
-                display.innerText = "Invalid Dates";
+                displayWithGt.innerText = "Err";
+                displayWithoutGt.innerText = "Err";
                 return;
             }
 
-            let workingDays = 0;
+            let standardWorkingDays = 0; // Excludes standard off days, holidays, exams (includes GTs as working day)
+            let gtDaysCount = 0; // Days where at least one GT was recorded
             let current = new Date(start);
+            
+            const missed = getMissedClasses();
+            const gtDates = new Set();
+            missed.gt.forEach(item => {
+                if(item.dateObj >= start && item.dateObj <= end) {
+                    gtDates.add(item.dateString);
+                }
+            });
 
             while (current <= end) {
                 const dateStr = formatDate(current);
@@ -849,12 +894,16 @@
                 }
 
                 if (!isWeeklyOff && !isHoliday && !isExam) {
-                    workingDays++;
+                    standardWorkingDays++;
+                    if(gtDates.has(dateStr)) {
+                        gtDaysCount++;
+                    }
                 }
                 current.setDate(current.getDate() + 1);
             }
 
-            display.innerText = workingDays;
+            displayWithGt.innerText = standardWorkingDays;
+            displayWithoutGt.innerText = (standardWorkingDays - gtDaysCount);
         }
 
         function updateGreeting() {
@@ -1031,10 +1080,11 @@
             
             renderHolidaysList();
             renderExamsList();
+            renderAbsenceSection();
             updateWorkingDaysDisplay();
         }
         
-        // --- HOLIDAYS & EXAMS RENDERERS ---
+        // --- HOLIDAYS, EXAMS & ABSENCES RENDERERS ---
         function renderHolidaysList() {
             const container = document.getElementById('holidays-list-container');
             const holidays = Object.keys(appData.records).filter(d => appData.records[d].isHoliday).sort();
@@ -1090,6 +1140,53 @@
             });
             html += '</div>';
             container.innerHTML = html;
+        }
+
+        function renderAbsenceSection() {
+            const missed = getMissedClasses();
+
+            // Helper to group and render leaves & GTs
+            function renderGroup(list, containerId, emptyMsg, iconClass, colorClass) {
+                const container = document.getElementById(containerId);
+                if (!list || list.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4 font-semibold">${emptyMsg}</p>`;
+                    return;
+                }
+
+                let grouped = {};
+                list.forEach(item => {
+                    if(!grouped[item.dateString]) {
+                        grouped[item.dateString] = {
+                            dateObj: item.dateObj,
+                            count: 0,
+                            reason: (appData.records[item.dateString] && appData.records[item.dateString].dayReason) ? appData.records[item.dateString].dayReason : 'No reason provided'
+                        };
+                    }
+                    grouped[item.dateString].count++;
+                });
+
+                const sortedDates = Object.keys(grouped).sort((a,b) => new Date(b) - new Date(a));
+
+                let html = '<div class="space-y-2">';
+                sortedDates.forEach(dateStr => {
+                    const g = grouped[dateStr];
+                    const formatted = g.dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    html += `
+                        <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                            <div class="flex flex-col">
+                                <span class="text-sm font-bold text-slate-800">${formatted} <span class="text-[10px] ml-1 bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full border border-slate-200">${g.count} class${g.count > 1 ? 'es' : ''}</span></span>
+                                <span class="text-xs text-slate-500 font-medium truncate max-w-[150px]" title="${g.reason}">${g.reason}</span>
+                            </div>
+                            <i class="${iconClass} ${colorClass} text-lg opacity-80"></i>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            renderGroup(missed.personal, 'personal-leaves-container', 'No personal leaves recorded.', 'fas fa-user-minus', 'text-rose-400');
+            renderGroup(missed.gt, 'gt-leaves-container', 'No GTs recorded.', 'fas fa-users-slash', 'text-purple-400');
         }
 
         function renderDateUI() {
