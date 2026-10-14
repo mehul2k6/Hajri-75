@@ -286,46 +286,6 @@
                     </div>
                 </div>
 
-                <!-- Holidays View Section -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Holidays Tracker</label>
-                        <button onclick="openHolidayModal()" class="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors flex items-center gap-1"><i class="fas fa-plus"></i> Add Holiday</button>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto" id="holidays-list-container">
-                        <!-- Holidays injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Exams View Section -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Exam Ranges</label>
-                        <button onclick="openExamModal()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors flex items-center gap-1"><i class="fas fa-plus"></i> Add Exams</button>
-                    </div>
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-40 overflow-y-auto" id="exams-list-container">
-                        <!-- Exam ranges injected via JS -->
-                    </div>
-                </div>
-
-                <!-- Absences View Section (Leaves & GTs) -->
-                <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-slate-100">
-                    <!-- Personal Leaves -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Personal Leaves</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto" id="personal-leaves-container">
-                            <!-- Personal Leaves injected via JS -->
-                        </div>
-                    </div>
-                    <!-- GT (Mass Bunks) -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">GT (Mass Bunks)</label>
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-y-auto" id="gt-leaves-container">
-                            <!-- GTs injected via JS -->
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Dual Count Working Days Display -->
                 <div class="mt-5 p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col md:flex-row items-center justify-between shadow-inner gap-4">
                     <div class="flex items-center">
@@ -367,73 +327,6 @@
         </div>
 
     </main>
-
-    <!-- ================= ADD HOLIDAY MODAL ================= -->
-    <div id="holiday-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
-                <h3 class="font-bold text-lg"><i class="fas fa-umbrella-beach mr-2"></i>Add Holiday</h3>
-                <button onclick="closeHolidayModal()" class="text-blue-200 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="flex items-center space-x-4 mb-2">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="holiday-type" value="single" checked onchange="toggleHolidayRange()" class="text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm font-bold text-slate-700">Single Day</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="holiday-type" value="range" onchange="toggleHolidayRange()" class="text-blue-600 focus:ring-blue-500">
-                        <span class="text-sm font-bold text-slate-700">Date Range</span>
-                    </label>
-                </div>
-                
-                <div>
-                    <label id="lbl-hol-start" class="block text-sm font-semibold text-slate-700 mb-1">Date</label>
-                    <input type="date" id="add-holiday-start" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
-                </div>
-                
-                <div id="holiday-end-container" class="hidden">
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
-                    <input type="date" id="add-holiday-end" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-slate-50">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Reason (Optional)</label>
-                    <input type="text" id="add-holiday-reason" placeholder="e.g. Diwali, Sick Leave" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                
-                <div class="pt-4 flex gap-3">
-                    <button onclick="closeHolidayModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-lg hover:bg-slate-200 transition">Cancel</button>
-                    <button onclick="saveHoliday()" class="flex-1 bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 shadow-md transition">Save Holiday</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= ADD EXAM MODAL ================= -->
-    <div id="exam-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-            <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
-                <h3 class="font-bold text-lg"><i class="fas fa-pen-nib mr-2"></i>Add Exam Range</h3>
-                <button onclick="closeExamModal()" class="text-indigo-200 hover:text-white transition"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
-                    <input type="date" id="add-exam-start" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
-                    <input type="date" id="add-exam-end" class="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
-                </div>
-                
-                <div class="pt-4 flex gap-3">
-                    <button onclick="closeExamModal()" class="flex-1 bg-slate-100 text-slate-700 font-bold py-2.5 rounded-lg hover:bg-slate-200 transition">Cancel</button>
-                    <button onclick="saveExamRange()" class="flex-1 bg-indigo-600 text-white font-bold py-2.5 rounded-lg hover:bg-indigo-700 shadow-md transition">Save Exams</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ================= AUTHENTICATION MODAL ================= -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-[60] flex items-center justify-center fade-in p-4">
@@ -548,7 +441,6 @@
             studentSemester: "",
             semesterStart: "",
             semesterEnd: "",
-            examRanges: [],
             targetCriteria: 75,
             slotTimings: [
                 "9:00 - 10:00 AM", "10:00 - 11:00 AM", "11:00 - 12:00 PM",
@@ -782,8 +674,8 @@
             if (appData.semesterEnd === undefined) appData.semesterEnd = "";
             if (!appData.targetCriteria) appData.targetCriteria = 75;
             
-            if (!appData.examRanges) appData.examRanges = [];
-            // cleanup deprecated strings if present from a previous migration
+            // Cleanup deprecated properties
+            if (appData.examRanges !== undefined) delete appData.examRanges;
             if (typeof appData.semesterHolidays === 'string') delete appData.semesterHolidays;
             if (typeof appData.examDays === 'string') delete appData.examDays;
 
@@ -860,8 +752,8 @@
                 return;
             }
 
-            let standardWorkingDays = 0; // Excludes standard off days, holidays, exams (includes GTs as working day)
-            let gtDaysCount = 0; // Days where at least one GT was recorded
+            let standardWorkingDays = 0; 
+            let gtDaysCount = 0; 
             let current = new Date(start);
             
             const missed = getMissedClasses();
@@ -876,24 +768,13 @@
                 const dateStr = formatDate(current);
                 const dayName = DAYS[current.getDay()];
                 
-                // Weekly holiday
+                // Weekly holiday (from schedule template)
                 const isWeeklyOff = appData.schedule[dayName] && appData.schedule[dayName].holiday;
                 
-                // Holiday marked in records
+                // Holiday marked in daily records
                 const isHoliday = appData.records[dateStr] && appData.records[dateStr].isHoliday;
-                
-                // Exam days
-                let isExam = false;
-                if (appData.examRanges) {
-                    for (const ex of appData.examRanges) {
-                        if (current >= new Date(ex.start) && current <= new Date(ex.end)) {
-                            isExam = true;
-                            break;
-                        }
-                    }
-                }
 
-                if (!isWeeklyOff && !isHoliday && !isExam) {
+                if (!isWeeklyOff && !isHoliday) {
                     standardWorkingDays++;
                     if(gtDates.has(dateStr)) {
                         gtDaysCount++;
@@ -1078,115 +959,7 @@
             renderTimetableGrid();
             renderMissedClasses();
             
-            renderHolidaysList();
-            renderExamsList();
-            renderAbsenceSection();
             updateWorkingDaysDisplay();
-        }
-        
-        // --- HOLIDAYS, EXAMS & ABSENCES RENDERERS ---
-        function renderHolidaysList() {
-            const container = document.getElementById('holidays-list-container');
-            const holidays = Object.keys(appData.records).filter(d => appData.records[d].isHoliday).sort();
-            
-            if(holidays.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4 font-semibold">No holidays added yet.</p>';
-                return;
-            }
-            
-            let html = '<div class="space-y-2">';
-            holidays.forEach(dateStr => {
-                const dateObj = new Date(dateStr + "T00:00:00");
-                const formatted = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                const reason = appData.records[dateStr].dayReason || 'No reason provided';
-                
-                html += `
-                    <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
-                        <div class="flex flex-col">
-                            <span class="text-sm font-bold text-slate-800">${formatted}</span>
-                            <span class="text-xs text-slate-500 font-medium">${reason}</span>
-                        </div>
-                        <button onclick="removeHoliday('${dateStr}')" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        }
-        
-        function renderExamsList() {
-            const container = document.getElementById('exams-list-container');
-            if(!appData.examRanges || appData.examRanges.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4 font-semibold">No exam ranges added yet.</p>';
-                return;
-            }
-            
-            let html = '<div class="space-y-2">';
-            appData.examRanges.forEach(ex => {
-                const startObj = new Date(ex.start + "T00:00:00");
-                const endObj = new Date(ex.end + "T00:00:00");
-                const startFmt = startObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const endFmt = endObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                
-                html += `
-                    <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-calendar-check text-indigo-400"></i>
-                            <span class="text-sm font-bold text-slate-800">${startFmt} — ${endFmt}</span>
-                        </div>
-                        <button onclick="removeExamRange(${ex.id})" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function renderAbsenceSection() {
-            const missed = getMissedClasses();
-
-            // Helper to group and render leaves & GTs
-            function renderGroup(list, containerId, emptyMsg, iconClass, colorClass) {
-                const container = document.getElementById(containerId);
-                if (!list || list.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4 font-semibold">${emptyMsg}</p>`;
-                    return;
-                }
-
-                let grouped = {};
-                list.forEach(item => {
-                    if(!grouped[item.dateString]) {
-                        grouped[item.dateString] = {
-                            dateObj: item.dateObj,
-                            count: 0,
-                            reason: (appData.records[item.dateString] && appData.records[item.dateString].dayReason) ? appData.records[item.dateString].dayReason : 'No reason provided'
-                        };
-                    }
-                    grouped[item.dateString].count++;
-                });
-
-                const sortedDates = Object.keys(grouped).sort((a,b) => new Date(b) - new Date(a));
-
-                let html = '<div class="space-y-2">';
-                sortedDates.forEach(dateStr => {
-                    const g = grouped[dateStr];
-                    const formatted = g.dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    html += `
-                        <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
-                            <div class="flex flex-col">
-                                <span class="text-sm font-bold text-slate-800">${formatted} <span class="text-[10px] ml-1 bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-full border border-slate-200">${g.count} class${g.count > 1 ? 'es' : ''}</span></span>
-                                <span class="text-xs text-slate-500 font-medium truncate max-w-[150px]" title="${g.reason}">${g.reason}</span>
-                            </div>
-                            <i class="${iconClass} ${colorClass} text-lg opacity-80"></i>
-                        </div>
-                    `;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            }
-
-            renderGroup(missed.personal, 'personal-leaves-container', 'No personal leaves recorded.', 'fas fa-user-minus', 'text-rose-400');
-            renderGroup(missed.gt, 'gt-leaves-container', 'No GTs recorded.', 'fas fa-users-slash', 'text-purple-400');
         }
 
         function renderDateUI() {
@@ -1555,96 +1328,6 @@
             saveData(); renderAll();
         }
         
-        // --- HOLIDAY MODAL LOGIC ---
-        function openHolidayModal() {
-            document.getElementById('add-holiday-start').value = '';
-            document.getElementById('add-holiday-end').value = '';
-            document.getElementById('add-holiday-reason').value = '';
-            document.querySelector('input[name="holiday-type"][value="single"]').checked = true;
-            toggleHolidayRange();
-            document.getElementById('holiday-modal').classList.remove('hidden');
-        }
-        
-        function closeHolidayModal() {
-            document.getElementById('holiday-modal').classList.add('hidden');
-        }
-        
-        function toggleHolidayRange() {
-            const isRange = document.querySelector('input[name="holiday-type"]:checked').value === 'range';
-            document.getElementById('holiday-end-container').classList.toggle('hidden', !isRange);
-            document.getElementById('lbl-hol-start').innerText = isRange ? "Start Date" : "Date";
-        }
-        
-        function saveHoliday() {
-            const isRange = document.querySelector('input[name="holiday-type"]:checked').value === 'range';
-            const startVal = document.getElementById('add-holiday-start').value;
-            const endVal = document.getElementById('add-holiday-end').value;
-            const reason = document.getElementById('add-holiday-reason').value.trim();
-            
-            if(!startVal) { showToast("Please select a date", "error"); return; }
-            if(isRange && !endVal) { showToast("Please select an end date", "error"); return; }
-            
-            const start = new Date(startVal);
-            const end = isRange ? new Date(endVal) : new Date(startVal);
-            
-            if(start > end) { showToast("Start date must be before end date", "error"); return; }
-            
-            let current = new Date(start);
-            while(current <= end) {
-                const dateStr = formatDate(current);
-                if (!appData.records[dateStr]) {
-                    appData.records[dateStr] = { isHoliday: true, slots: {} };
-                } else {
-                    appData.records[dateStr].isHoliday = true;
-                }
-                if(reason) appData.records[dateStr].dayReason = reason;
-                
-                current.setDate(current.getDate() + 1);
-            }
-            
-            saveData(); renderAll(); closeHolidayModal(); showToast("Holiday(s) added successfully", "success");
-        }
-        
-        function removeHoliday(dateStr) {
-            if(appData.records[dateStr]) {
-                appData.records[dateStr].isHoliday = false;
-                appData.records[dateStr].dayReason = '';
-                saveData(); renderAll(); showToast("Holiday removed", "info");
-            }
-        }
-        
-        // --- EXAM MODAL LOGIC ---
-        function openExamModal() {
-            document.getElementById('add-exam-start').value = '';
-            document.getElementById('add-exam-end').value = '';
-            document.getElementById('exam-modal').classList.remove('hidden');
-        }
-        
-        function closeExamModal() {
-            document.getElementById('exam-modal').classList.add('hidden');
-        }
-        
-        function saveExamRange() {
-            const startVal = document.getElementById('add-exam-start').value;
-            const endVal = document.getElementById('add-exam-end').value;
-            
-            if(!startVal || !endVal) { showToast("Please select both dates", "error"); return; }
-            if(new Date(startVal) > new Date(endVal)) { showToast("Start date must be before end date", "error"); return; }
-            
-            appData.examRanges.push({
-                id: Date.now(),
-                start: startVal,
-                end: endVal
-            });
-            
-            saveData(); renderAll(); closeExamModal(); showToast("Exam range added", "success");
-        }
-        
-        function removeExamRange(id) {
-            appData.examRanges = appData.examRanges.filter(e => e.id !== id);
-            saveData(); renderAll(); showToast("Exam range removed", "info");
-        }
-
         function markClass(indicesArray, status) {
             const dateStr = formatDate(currentDate);
             if (!appData.records[dateStr]) appData.records[dateStr] = { isHoliday: false, slots: {} };
