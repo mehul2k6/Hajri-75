@@ -278,6 +278,35 @@
                 </div>
             </div>
 
+            <!-- New Semester Details Section -->
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4"><i class="fas fa-calendar-alt text-blue-500 mr-2"></i>Semester Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                        <input type="date" id="semester-start" onchange="updateSemesterInfo('start', this.value)" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">End Date</label>
+                        <input type="date" id="semester-end" onchange="updateSemesterInfo('end', this.value)" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50">
+                    </div>
+                </div>
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Holidays (Comma separated YYYY-MM-DD)</label>
+                        <textarea id="semester-holidays" onchange="updateSemesterInfo('holidays', this.value)" placeholder="e.g., 2026-10-24, 2026-11-01" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Exam Days (Comma separated YYYY-MM-DD)</label>
+                        <textarea id="semester-exams" onchange="updateSemesterInfo('exams', this.value)" placeholder="e.g., 2026-12-01, 2026-12-03" class="w-full p-3 text-sm font-semibold border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-slate-50"></textarea>
+                    </div>
+                </div>
+                <div class="mt-5 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between shadow-inner">
+                    <span class="font-bold text-slate-700 text-sm"><i class="fas fa-briefcase text-blue-500 mr-2"></i>Estimated Working Days:</span>
+                    <span id="working-days-display" class="text-xl font-black text-blue-700">--</span>
+                </div>
+            </div>
+
             <div class="mt-8 pt-6 border-t border-slate-100">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Cloud Sync & Account</h3>
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -411,6 +440,10 @@
             studentName: "",
             studentSection: "Mech - Section 1 (M1B2)",
             studentSemester: "",
+            semesterStart: "",
+            semesterEnd: "",
+            semesterHolidays: "",
+            examDays: "",
             targetCriteria: 75,
             slotTimings: [
                 "9:00 - 10:00 AM", "10:00 - 11:00 AM", "11:00 - 12:00 PM",
@@ -639,6 +672,10 @@
             if (appData.studentName === undefined) appData.studentName = "";
             if (appData.studentSection === undefined) appData.studentSection = appData.batchName || "";
             if (appData.studentSemester === undefined) appData.studentSemester = "";
+            if (appData.semesterStart === undefined) appData.semesterStart = "";
+            if (appData.semesterEnd === undefined) appData.semesterEnd = "";
+            if (appData.semesterHolidays === undefined) appData.semesterHolidays = "";
+            if (appData.examDays === undefined) appData.examDays = "";
             if (!appData.targetCriteria) appData.targetCriteria = 75;
 
             document.getElementById('target-criteria').value = appData.targetCriteria;
@@ -687,6 +724,56 @@
             if (field === 'semester') appData.studentSemester = val;
             updateGreeting();
             saveData();
+        }
+        
+        function updateSemesterInfo(field, val) {
+            if (field === 'start') appData.semesterStart = val;
+            if (field === 'end') appData.semesterEnd = val;
+            if (field === 'holidays') appData.semesterHolidays = val;
+            if (field === 'exams') appData.examDays = val;
+            updateWorkingDaysDisplay();
+            saveData();
+        }
+
+        function updateWorkingDaysDisplay() {
+            const display = document.getElementById('working-days-display');
+            if (!appData.semesterStart || !appData.semesterEnd) {
+                display.innerText = "--";
+                return;
+            }
+
+            const start = new Date(appData.semesterStart);
+            const end = new Date(appData.semesterEnd);
+            if (start > end) {
+                display.innerText = "Invalid Dates";
+                return;
+            }
+
+            // Function to safely extract dates from comma separated string
+            const extractDates = (str) => {
+                if(!str) return new Set();
+                return new Set(str.split(',').map(d => d.trim()).filter(d => d.match(/^\d{4}-\d{2}-\d{2}$/)));
+            };
+
+            const holidays = extractDates(appData.semesterHolidays);
+            const exams = extractDates(appData.examDays);
+
+            let workingDays = 0;
+            let current = new Date(start);
+
+            while (current <= end) {
+                const dateStr = formatDate(current);
+                const dayName = DAYS[current.getDay()];
+                // Check if it's a weekly holiday in the timetable
+                const isWeeklyOff = appData.schedule[dayName] && appData.schedule[dayName].holiday;
+
+                if (!isWeeklyOff && !holidays.has(dateStr) && !exams.has(dateStr)) {
+                    workingDays++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+
+            display.innerText = workingDays;
         }
 
         function updateGreeting() {
@@ -849,6 +936,11 @@
             document.getElementById('student-name').value = appData.studentName || "";
             document.getElementById('student-section').value = appData.studentSection || "";
             document.getElementById('student-semester').value = appData.studentSemester || "";
+            document.getElementById('semester-start').value = appData.semesterStart || "";
+            document.getElementById('semester-end').value = appData.semesterEnd || "";
+            document.getElementById('semester-holidays').value = appData.semesterHolidays || "";
+            document.getElementById('semester-exams').value = appData.examDays || "";
+            updateWorkingDaysDisplay();
             updateGreeting();
             
             const stats = calculateStats();
